@@ -1,5 +1,8 @@
 # InfoOrganizer
 
+[![CI](https://github.com/1RV1NG-Y/InfoOrganizer/actions/workflows/ci.yml/badge.svg)](https://github.com/1RV1NG-Y/InfoOrganizer/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Turn messy records — ad-hoc Excel sheets, CSV exports, and **photos of paper records** — into a clean,
 queryable inventory database with full audit traceability. Built for small organizations that track
 stock arrivals and sales but have no consistent format for their data.
