@@ -5,6 +5,7 @@ using InfoOrganizer.Application;
 using InfoOrganizer.Data;
 using InfoOrganizer.Web.Components;
 using InfoOrganizer.Web.State;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,26 @@ var openBrowser = builder.Configuration.GetValue("Launcher:OpenBrowser", !builde
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Localization: the AppStrings marker type lives in the InfoOrganizer.Web.Resources namespace,
+// which already resolves to the /Resources folder — no ResourcesPath prefix needed.
+builder.Services.AddLocalization();
+
+// The product targets small Mexican businesses: default to Spanish (es-MX), keep English available.
+var supportedCultures = new[] { "es-MX", "es", "en-US", "en" };
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.SetDefaultCulture(SupportedCultures.Default)
+        .AddSupportedCultures(supportedCultures)
+        .AddSupportedUICultures(supportedCultures);
+
+    // Cookie first (explicit user choice), then the browser's Accept-Language header.
+    options.RequestCultureProviders = new List<IRequestCultureProvider>
+    {
+        new CookieRequestCultureProvider(),
+        new AcceptLanguageHeaderRequestCultureProvider()
+    };
+});
 
 var connectionString = builder.Configuration.GetConnectionString("Default")
     ?? $"Data Source={AppPaths.GetDefaultDatabasePath()}";
@@ -42,6 +63,10 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
+// Set the request culture (from cookie, then Accept-Language, then es-MX) before rendering.
+// The Blazor circuit's culture is fixed at connection start, so a language change needs a full reload.
+app.UseRequestLocalization();
+
 app.UseAntiforgery();
 
 app.MapStaticAssets();
@@ -65,11 +90,41 @@ app.MapGet("/export/inventory.csv", async (TrackingService tracking) =>
     return Results.File(Encoding.UTF8.GetBytes(sb.ToString()), "text/csv", "inventory.csv");
 });
 
+// Language switcher. A plain HTTP endpoint is required because the Blazor circuit's culture is
+// fixed at connection start; setting the cookie here + redirecting forces a fresh circuit.
+app.MapGet("/culture/set", (HttpContext context, string? culture, string? redirectUri) =>
+{
+    if (string.IsNullOrWhiteSpace(culture) || !SupportedCultures.IsSupported(culture))
+        return Results.BadRequest("Unsupported culture.");
+
+    context.Response.Cookies.Append(
+        CookieRequestCultureProvider.DefaultCookieName,
+        CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+        new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), IsEssential = true });
+
+    var target = LocalRedirectTarget(redirectUri);
+    return Results.LocalRedirect(target);
+});
+
 // Convenience for local demos: seed sample data.
 if (app.Environment.IsDevelopment())
     app.MapPost("/dev/seed", async (SeedService seed) => Results.Ok(new { seeded = await seed.SeedSampleAsync() }));
 
 app.Run();
+
+static string LocalRedirectTarget(string? redirectUri)
+{
+    // Only allow local, root-relative redirects to avoid open-redirect issues.
+    if (!string.IsNullOrWhiteSpace(redirectUri)
+        && redirectUri.StartsWith('/')
+        && !redirectUri.StartsWith("//")
+        && !redirectUri.StartsWith("/\\"))
+    {
+        return redirectUri;
+    }
+
+    return "/";
+}
 
 static void OpenBrowser(string? address)
 {
@@ -145,3 +200,14 @@ static string Csv(string? value)
 }
 
 static string CsvNumber(decimal? value) => value?.ToString(CultureInfo.InvariantCulture) ?? "";
+
+/// <summary>The UI cultures the app supports, and the default (es-MX for small Mexican businesses).</summary>
+static class SupportedCultures
+{
+    public const string Default = "es-MX";
+
+    private static readonly HashSet<string> Names =
+        new(new[] { "es-MX", "es", "en-US", "en" }, StringComparer.OrdinalIgnoreCase);
+
+    public static bool IsSupported(string culture) => Names.Contains(culture);
+}

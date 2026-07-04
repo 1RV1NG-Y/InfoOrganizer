@@ -2,19 +2,20 @@
 @rendermode InteractiveServer
 @using System.Text.Json
 @inject ImportService Importer
+@inject IStringLocalizer<AppStrings> L
 
-<PageTitle>Import detail</PageTitle>
+<PageTitle>@L["ImportDetail_Title"]</PageTitle>
 
 @if (_details is null)
 {
-    <h1>Import detail</h1>
+    <h1>@L["ImportDetail_Title"]</h1>
     @if (_missing)
     {
-        <p class="text-muted">Import batch not found.</p>
+        <p class="text-muted">@L["ReviewRows_BatchNotFound"]</p>
     }
     else
     {
-        <p>Loading...</p>
+        <p>@L["Common_Loading"]</p>
     }
 }
 else
@@ -23,51 +24,51 @@ else
         <div>
             <h1 class="mb-1">@_details.FileName</h1>
             <div class="d-flex flex-wrap align-items-center gap-2 text-muted">
-                <span class="badge text-bg-light border">@_details.SourceType</span>
-                <span class="badge @BatchStatusClass(_details.Status)">@_details.Status</span>
+                <span class="badge text-bg-light border">@_details.SourceType.Display(L)</span>
+                <span class="badge @BatchStatusClass(_details.Status)">@_details.Status.Display(L)</span>
                 <span>@_details.ImportedAtUtc.ToLocalTime().ToString("g")</span>
             </div>
         </div>
-        <a class="btn btn-primary" href="@($"/imports/{BatchId}/review")">Open review</a>
+        <a class="btn btn-primary" href="@($"/imports/{BatchId}/review")">@L["ImportDetail_OpenReview"]</a>
     </div>
 
     <div class="row g-2 mb-4">
         <div class="col-sm-6 col-lg-2">
             <div class="border rounded p-2 h-100">
-                <div class="text-muted small">Total rows</div>
+                <div class="text-muted small">@L["ImportDetail_TotalRows"]</div>
                 <div class="fs-5">@_details.RowCount</div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-2">
             <div class="border rounded p-2 h-100">
-                <div class="text-muted small">Ready</div>
+                <div class="text-muted small">@L["ReviewRows_Ready"]</div>
                 <div class="fs-5">@_details.ReadyRows</div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-2">
             <div class="border rounded p-2 h-100">
-                <div class="text-muted small">Needs review</div>
+                <div class="text-muted small">@L["ReviewRows_NeedsReview"]</div>
                 <div class="fs-5">@_details.NeedsReviewRows</div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-2">
             <div class="border rounded p-2 h-100">
-                <div class="text-muted small">Applied</div>
+                <div class="text-muted small">@L["ReviewRows_Applied"]</div>
                 <div class="fs-5">@_details.AppliedRows</div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-2">
             <div class="border rounded p-2 h-100">
-                <div class="text-muted small">Rejected</div>
+                <div class="text-muted small">@L["ReviewRows_Rejected"]</div>
                 <div class="fs-5">@_details.RejectedRows</div>
             </div>
         </div>
         <div class="col-sm-6 col-lg-2">
             <div class="border rounded p-2 h-100">
-                <div class="text-muted small">Source profile</div>
+                <div class="text-muted small">@L["ImportDetail_SourceProfile"]</div>
                 @if (string.IsNullOrWhiteSpace(_details.SourceProfileName))
                 {
-                    <div>none</div>
+                    <div>@L["Common_None"]</div>
                 }
                 else
                 {
@@ -80,21 +81,21 @@ else
 
     <section class="mb-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-            <h2 class="h5 mb-0">Review rows</h2>
-            <a class="btn btn-sm btn-outline-primary" href="@($"/imports/{BatchId}/review")">Review rows</a>
+            <h2 class="h5 mb-0">@L["ImportDetail_ReviewRows"]</h2>
+            <a class="btn btn-sm btn-outline-primary" href="@($"/imports/{BatchId}/review")">@L["ImportDetail_ReviewRows"]</a>
         </div>
         <div class="table-responsive">
             <table class="table table-sm table-striped align-middle">
                 <thead>
                     <tr>
-                        <th>Row</th>
-                        <th>Status</th>
-                        <th>Confidence</th>
-                        <th>Product</th>
-                        <th class="text-end">Qty</th>
-                        <th>Kind</th>
-                        <th>Location</th>
-                        <th>Issues</th>
+                        <th>@L["Common_Row"]</th>
+                        <th>@L["Common_Status"]</th>
+                        <th>@L["Common_Confidence"]</th>
+                        <th>@L["Common_Product"]</th>
+                        <th class="text-end">@L["Common_QuantityShort"]</th>
+                        <th>@L["Common_Kind"]</th>
+                        <th>@L["Common_Location"]</th>
+                        <th>@L["Common_Issues"]</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -103,11 +104,11 @@ else
                         var row = detail.Row;
                         <tr>
                             <td>@(row.RowIndex + 1)</td>
-                            <td><span class="badge @ReviewStatusClass(row.Status)">@row.Status</span></td>
+                            <td><span class="badge @ReviewStatusClass(row.Status)">@row.Status.Display(L)</span></td>
                             <td>@($"{row.Confidence:P0}")</td>
                             <td>@(row.ProductName ?? row.Sku)</td>
                             <td class="text-end">@row.Quantity</td>
-                            <td>@row.Kind</td>
+                            <td>@row.Kind.Display(L)</td>
                             <td>@row.LocationName</td>
                             <td>
                                 @foreach (var issue in Issues(row))
@@ -123,10 +124,10 @@ else
     </section>
 
     <section class="mb-4">
-        <h2 class="h5">Raw source rows</h2>
+        <h2 class="h5">@L["ImportDetail_RawSourceRows"]</h2>
         @if (_details.RawRecords.Count == 0)
         {
-            <p class="text-muted">No raw source rows were captured.</p>
+            <p class="text-muted">@L["ImportDetail_NoRawRows"]</p>
         }
         else
         {
@@ -134,7 +135,7 @@ else
                 <table class="table table-sm table-striped align-middle">
                     <thead>
                         <tr>
-                            <th>Row</th>
+                            <th>@L["Common_Row"]</th>
                             @foreach (var column in _rawColumns)
                             {
                                 <th>@column</th>
@@ -159,10 +160,10 @@ else
     </section>
 
     <section class="mb-4">
-        <h2 class="h5">Created movements</h2>
+        <h2 class="h5">@L["ImportDetail_CreatedMovements"]</h2>
         @if (_details.Movements.Count == 0)
         {
-            <p class="text-muted">No movements have been created from this batch yet.</p>
+            <p class="text-muted">@L["ImportDetail_NoMovements"]</p>
         }
         else
         {
@@ -170,14 +171,14 @@ else
                 <table class="table table-sm table-striped align-middle">
                     <thead>
                         <tr>
-                            <th>Product</th>
-                            <th>Kind</th>
-                            <th class="text-end">Qty</th>
-                            <th class="text-end">Unit price</th>
-                            <th>Cur</th>
-                            <th>Date</th>
-                            <th>Location</th>
-                            <th>Source row</th>
+                            <th>@L["Common_Product"]</th>
+                            <th>@L["Common_Kind"]</th>
+                            <th class="text-end">@L["Common_QuantityShort"]</th>
+                            <th class="text-end">@L["Common_UnitPrice"]</th>
+                            <th>@L["Common_CurrencyShort"]</th>
+                            <th>@L["Common_Date"]</th>
+                            <th>@L["Common_Location"]</th>
+                            <th>@L["ImportDetail_SourceRow"]</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -185,7 +186,7 @@ else
                         {
                             <tr>
                                 <td>@movement.ProductName</td>
-                                <td><span class="badge @KindClass(movement.Kind)">@movement.Kind</span></td>
+                                <td><span class="badge @KindClass(movement.Kind)">@movement.Kind.Display(L)</span></td>
                                 <td class="text-end">@movement.Quantity</td>
                                 <td class="text-end">@movement.UnitPrice</td>
                                 <td>@movement.Currency</td>

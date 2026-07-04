@@ -1,39 +1,42 @@
 @page "/settings"
 @rendermode InteractiveServer
+@using System.Globalization
 @inject CatalogService Catalog
 @inject ILocalSettingsService LocalSettings
 @inject InfoOrganizer.Ai.IAiClient Ai
+@inject NavigationManager Nav
+@inject IStringLocalizer<AppStrings> L
 
-<PageTitle>Settings</PageTitle>
+<PageTitle>@L["Settings_Title"]</PageTitle>
 
-<h1>Settings</h1>
+<h1>@L["Settings_Title"]</h1>
 
-<h2 class="h5 mt-3">AI features (photo import and mapping suggestions)</h2>
+<h2 class="h5 mt-3">@L["Settings_AiFeatures"]</h2>
 @if (Ai.IsConfigured)
 {
-    <p class="text-success mb-2">Configured</p>
+    <p class="text-success mb-2">@L["Settings_AiConfigured"]</p>
 }
 else
 {
-    <p class="text-muted mb-2">Not configured &mdash; photo import and AI mapping suggestions are disabled; spreadsheet import still works offline.</p>
+    <p class="text-muted mb-2">@L["Settings_AiNotConfigured"]</p>
 }
 
 @if (_savedKeyHint is not null)
 {
-    <p class="small text-muted mb-2">Saved key: <code>@_savedKeyHint</code></p>
+    <p class="small text-muted mb-2">@L["Settings_SavedKey"] <code>@_savedKeyHint</code></p>
 }
 
 <div class="d-flex flex-column flex-sm-row gap-2 align-items-sm-end mb-2" style="max-width: 640px">
     <div class="flex-grow-1">
-        <label class="form-label" for="anthropic-api-key">Anthropic API key</label>
+        <label class="form-label" for="anthropic-api-key">@L["Settings_AnthropicApiKey"]</label>
         <input id="anthropic-api-key" type="password" class="form-control" autocomplete="off"
-               placeholder="@(_hasSavedAnthropicApiKey ? "Paste a new key to replace the saved key" : "Paste an Anthropic API key")"
+               placeholder="@(_hasSavedAnthropicApiKey ? L["Settings_PlaceholderReplaceKey"] : L["Settings_PlaceholderPasteKey"])"
                @bind="_anthropicApiKeyInput" />
     </div>
-    <button class="btn btn-primary" @onclick="SaveAnthropicKey">Save</button>
+    <button class="btn btn-primary" @onclick="SaveAnthropicKey">@L["Common_Save"]</button>
     @if (_hasSavedAnthropicApiKey)
     {
-        <button class="btn btn-outline-danger" @onclick="RemoveAnthropicKey">Remove key</button>
+        <button class="btn btn-outline-danger" @onclick="RemoveAnthropicKey">@L["Settings_RemoveKey"]</button>
     }
 </div>
 
@@ -42,21 +45,27 @@ else
     <p class="small text-success">@_aiSettingsMessage</p>
 }
 
-<h2 class="h5 mt-4">Reorder thresholds</h2>
-<p class="text-muted">Set the level at which a product is flagged low on the dashboard.</p>
+<h2 class="h5 mt-4">@L["Settings_Language"]</h2>
+<div class="btn-group btn-group-sm mb-2" role="group">
+    <a class="btn @LanguageButtonClass("es")" href="@CultureLink("es-MX")">@L["Settings_LanguageSpanish"]</a>
+    <a class="btn @LanguageButtonClass("en")" href="@CultureLink("en-US")">@L["Settings_LanguageEnglish"]</a>
+</div>
+
+<h2 class="h5 mt-4">@L["Settings_ReorderThresholds"]</h2>
+<p class="text-muted">@L["Settings_ReorderIntro"]</p>
 
 @if (_products is null)
 {
-    <p>Loading…</p>
+    <p>@L["Common_Loading"]</p>
 }
 else if (_products.Count == 0)
 {
-    <p class="text-muted">No products yet. <a href="upload">Import some records</a> first.</p>
+    <p class="text-muted">@L["Settings_NoProductsFirst"] <a href="upload">@L["Settings_ImportSomeRecordsFirst"]</a> @L["Settings_First"]</p>
 }
 else
 {
     <table class="table table-sm align-middle" style="max-width: 640px">
-        <thead><tr><th>Product</th><th>Code</th><th style="width: 9rem">Reorder at</th><th></th></tr></thead>
+        <thead><tr><th>@L["Common_Product"]</th><th>@L["Common_Code"]</th><th style="width: 9rem">@L["Inventory_ReorderAt"]</th><th></th></tr></thead>
         <tbody>
             @foreach (var p in _products)
             {
@@ -65,10 +74,10 @@ else
                     <td>@p.Sku</td>
                     <td><input type="number" class="form-control form-control-sm" @bind="_thresholds[p.Id]" /></td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary" @onclick="() => SaveThresholdAsync(p.Id)">Save</button>
+                        <button class="btn btn-sm btn-outline-primary" @onclick="() => SaveThresholdAsync(p.Id)">@L["Common_Save"]</button>
                         @if (_savedId == p.Id)
                         {
-                            <span class="text-success small ms-1">Saved</span>
+                            <span class="text-success small ms-1">@L["Common_Saved"]</span>
                         }
                     </td>
                 </tr>
@@ -77,16 +86,16 @@ else
     </table>
 }
 
-<h2 class="h5 mt-4">Saved mappings</h2>
-<p class="text-muted">Formats the system recognizes automatically. Delete one to be asked to confirm it again next time.</p>
+<h2 class="h5 mt-4">@L["Settings_SavedMappings"]</h2>
+<p class="text-muted">@L["Settings_SavedMappingsIntro"]</p>
 
 @if (_profiles is null)
 {
-    <p>Loading…</p>
+    <p>@L["Common_Loading"]</p>
 }
 else if (_profiles.Count == 0)
 {
-    <p class="text-muted">No saved mappings yet.</p>
+    <p class="text-muted">@L["Settings_NoSavedMappings"]</p>
 }
 else
 {
@@ -94,8 +103,8 @@ else
         @foreach (var pr in _profiles)
         {
             <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>@pr.Name <span class="badge text-bg-light">@pr.DefaultRecordType</span></span>
-                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteProfileAsync(pr.Id)">Delete</button>
+                <span>@pr.Name <span class="badge text-bg-light">@pr.DefaultRecordType.Display(L)</span></span>
+                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteProfileAsync(pr.Id)">@L["Common_Delete"]</button>
             </li>
         }
     </ul>
@@ -134,7 +143,7 @@ else
 
         LocalSettings.SaveAnthropicApiKey(_anthropicApiKeyInput);
         _anthropicApiKeyInput = null;
-        _aiSettingsMessage = "Saved";
+        _aiSettingsMessage = L["Settings_MsgSaved"];
         LoadAiSettings();
     }
 
@@ -142,9 +151,23 @@ else
     {
         LocalSettings.RemoveAnthropicApiKey();
         _anthropicApiKeyInput = null;
-        _aiSettingsMessage = "Removed";
+        _aiSettingsMessage = L["Settings_MsgRemoved"];
         LoadAiSettings();
     }
+
+    private string CultureLink(string culture) =>
+        $"/culture/set?culture={Uri.EscapeDataString(culture)}&redirectUri={Uri.EscapeDataString(CurrentLocalPath())}";
+
+    private string CurrentLocalPath()
+    {
+        var relative = "/" + Nav.ToBaseRelativePath(Nav.Uri);
+        return relative.StartsWith("//") ? "/settings" : relative;
+    }
+
+    private static string LanguageButtonClass(string language) =>
+        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals(language, StringComparison.OrdinalIgnoreCase)
+            ? "btn-primary"
+            : "btn-outline-secondary";
 
     private async Task SaveThresholdAsync(int id)
     {

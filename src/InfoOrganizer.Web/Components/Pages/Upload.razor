@@ -3,12 +3,12 @@
 @inject ImportService Importer
 @inject ImportSession Session
 @inject NavigationManager Nav
+@inject IStringLocalizer<AppStrings> L
 
-<PageTitle>Import</PageTitle>
+<PageTitle>@L["Upload_Title"]</PageTitle>
 
-<h1>Import records</h1>
-<p class="text-muted">Upload a spreadsheet (<code>.xlsx</code> or <code>.csv</code>) or a photo of a paper record. The system reads it,
-figures out the columns, and lets you confirm before saving.</p>
+<h1>@L["Upload_Heading"]</h1>
+<p class="text-muted">@((MarkupString)L["Upload_Intro", "<code>.xlsx</code>", "<code>.csv</code>"].Value)</p>
 
 <div class="mb-3">
     <InputFile OnChange="OnFilesAsync" accept=".xlsx,.xlsm,.xltx,.csv,.tsv,image/*" class="form-control" disabled="@_busy" />
@@ -18,7 +18,7 @@ figures out the columns, and lets you confirm before saving.</p>
 {
     <div class="d-flex align-items-center gap-2">
         <div class="spinner-border spinner-border-sm" role="status"></div>
-        <span>Reading <strong>@_fileName</strong>… this can take a moment for photos.</span>
+        <span>@((MarkupString)L["Upload_Reading", $"<strong>{System.Net.WebUtility.HtmlEncode(_fileName)}</strong>"].Value)</span>
     </div>
 }
 
@@ -53,7 +53,7 @@ figures out the columns, and lets you confirm before saving.</p>
             var previews = await Importer.PrepareAsync(upload);
             if (previews.Count == 0)
             {
-                _error = "Couldn't find any table in that file.";
+                _error = L["Upload_NoTable"];
                 return;
             }
 

@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Brand / layout -->
+  <data name="Brand" xml:space="preserve"><value>InfoOrganizer</value></data>
+  <data name="BlazorError_Unhandled" xml:space="preserve"><value>Ocurrió un error inesperado.</value></data>
+  <data name="Action_Reload" xml:space="preserve"><value>Recargar</value></data>
+
+  <!-- Navigation -->
+  <data name="Nav_Dashboard" xml:space="preserve"><value>Panel</value></data>
+  <data name="Nav_Import" xml:space="preserve"><value>Importar</value></data>
+  <data name="Nav_Imports" xml:space="preserve"><value>Importaciones</value></data>
+  <data name="Nav_Inventory" xml:space="preserve"><value>Inventario</value></data>
+  <data name="Nav_Movements" xml:space="preserve"><value>Movimientos</value></data>
+  <data name="Nav_Settings" xml:space="preserve"><value>Configuración</value></data>
+  <data name="Nav_Menu" xml:space="preserve"><value>Menú de navegación</value></data>
+
+  <!-- Common -->
+  <data name="Common_Loading" xml:space="preserve"><value>Cargando…</value></data>
+  <data name="Common_Product" xml:space="preserve"><value>Producto</value></data>
+  <data name="Common_Code" xml:space="preserve"><value>Código</value></data>
+  <data name="Common_Category" xml:space="preserve"><value>Categoría</value></data>
+  <data name="Common_Unit" xml:space="preserve"><value>Unidad</value></data>
+  <data name="Common_Quantity" xml:space="preserve"><value>Cantidad</value></data>
+  <data name="Common_QuantityShort" xml:space="preserve"><value>Cant.</value></data>
+  <data name="Common_UnitPrice" xml:space="preserve"><value>Precio unitario</value></data>
+  <data name="Common_UnitCost" xml:space="preserve"><value>Costo unitario</value></data>
+  <data name="Common_Value" xml:space="preserve"><value>Importe</value></data>
+  <data name="Common_Currency" xml:space="preserve"><value>Moneda</value></data>
+  <data name="Common_CurrencyShort" xml:space="preserve"><value>Mon.</value></data>
+  <data name="Common_Date" xml:space="preserve"><value>Fecha</value></data>
+  <data name="Common_Location" xml:space="preserve"><value>Almacén</value></data>
+  <data name="Common_Party" xml:space="preserve"><value>Proveedor/Cliente</value></data>
+  <data name="Common_Note" xml:space="preserve"><value>Nota</value></data>
+  <data name="Common_Row" xml:space="preserve"><value>Fila</value></data>
+  <data name="Common_Status" xml:space="preserve"><value>Estado</value></data>
+  <data name="Common_Confidence" xml:space="preserve"><value>Confianza</value></data>
+  <data name="Common_Issues" xml:space="preserve"><value>Problemas</value></data>
+  <data name="Common_Type" xml:space="preserve"><value>Tipo</value></data>
+  <data name="Common_Kind" xml:space="preserve"><value>Tipo</value></data>
+  <data name="Common_Source" xml:space="preserve"><value>Origen</value></data>
+  <data name="Common_File" xml:space="preserve"><value>Archivo</value></data>
+  <data name="Common_Save" xml:space="preserve"><value>Guardar</value></data>
+  <data name="Common_Saved" xml:space="preserve"><value>Guardado</value></data>
+  <data name="Common_Cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Common_Approve" xml:space="preserve"><value>Aprobar</value></data>
+  <data name="Common_Reject" xml:space="preserve"><value>Rechazar</value></data>
+  <data name="Common_Confirm" xml:space="preserve"><value>Confirmar</value></data>
+  <data name="Common_Delete" xml:space="preserve"><value>Eliminar</value></data>
+  <data name="Common_Open" xml:space="preserve"><value>Abrir</value></data>
+  <data name="Common_None" xml:space="preserve"><value>ninguno</value></data>
+
+  <!-- Dashboard / Home -->
+  <data name="Home_Title" xml:space="preserve"><value>Panel</value></data>
+  <data name="Home_SummaryPeriod" xml:space="preserve"><value>Periodo del resumen</value></data>
+  <data name="Home_AllTime" xml:space="preserve"><value>Histórico</value></data>
+  <data name="Home_ThisWeek" xml:space="preserve"><value>Esta semana</value></data>
+  <data name="Home_ThisMonth" xml:space="preserve"><value>Este mes</value></data>
+  <data name="Home_Products" xml:space="preserve"><value>Productos</value></data>
+  <data name="Home_LowStock" xml:space="preserve"><value>Inventario bajo</value></data>
+  <data name="Home_TotalReceived" xml:space="preserve"><value>Total recibido</value></data>
+  <data name="Home_TotalSoldOut" xml:space="preserve"><value>Total vendido / salidas</value></data>
+  <data name="Home_PurchasesValue" xml:space="preserve"><value>Compras (importe)</value></data>
+  <data name="Home_SalesValue" xml:space="preserve"><value>Ventas (importe)</value></data>
+  <data name="Home_ImportFileOrPhoto" xml:space="preserve"><value>Importar archivo o foto</value></data>
+  <data name="Home_ViewInventory" xml:space="preserve"><value>Ver inventario</value></data>
+  <data name="Home_NoDataYet" xml:space="preserve"><value>Aún no hay datos. Importa una hoja de cálculo o una foto de un registro en papel, o carga datos de ejemplo para explorar.</value></data>
+  <data name="Home_LoadSampleData" xml:space="preserve"><value>Cargar datos de ejemplo</value></data>
+  <data name="Coverage_NoCostData" xml:space="preserve"><value>sin datos de costo</value></data>
+  <data name="Coverage_BasedOn" xml:space="preserve"><value>basado en {0} de {1} movimientos con precio</value></data>
+
+  <!-- Upload -->
+  <data name="Upload_Title" xml:space="preserve"><value>Importar</value></data>
+  <data name="Upload_Heading" xml:space="preserve"><value>Importar registros</value></data>
+  <data name="Upload_Intro" xml:space="preserve"><value>Sube una hoja de cálculo ({0} o {1}) o una foto de un registro en papel. El sistema la lee, identifica las columnas y te deja confirmar antes de guardar.</value></data>
+  <data name="Upload_Reading" xml:space="preserve"><value>Leyendo {0}… puede tardar un momento con las fotos.</value></data>
+  <data name="Upload_NoTable" xml:space="preserve"><value>No se encontró ninguna tabla en ese archivo.</value></data>
+
+  <!-- Review mapping -->
+  <data name="Review_Title" xml:space="preserve"><value>Revisar asignación</value></data>
+  <data name="Review_NothingToReview" xml:space="preserve"><value>No hay nada que revisar.</value></data>
+  <data name="Review_UploadFileFirst" xml:space="preserve"><value>Sube un archivo</value></data>
+  <data name="Review_SheetOrTable" xml:space="preserve"><value>Hoja / tabla</value></data>
+  <data name="Review_RowsSuffix" xml:space="preserve"><value>{0} filas</value></data>
+  <data name="Review_RecognizedFormat" xml:space="preserve"><value>Formato reconocido. Revisa la asignación y luego prepara las filas antes de que afecten el inventario.</value></data>
+  <data name="Review_ProposedBy" xml:space="preserve"><value>Propuesto por {0}</value></data>
+  <data name="Review_ProposedByWithRationale" xml:space="preserve"><value>Propuesto por {0} - {1}</value></data>
+  <data name="Review_ColumnMapping" xml:space="preserve"><value>Asignación de columnas</value></data>
+  <data name="Review_Field" xml:space="preserve"><value>Campo</value></data>
+  <data name="Review_SourceColumn" xml:space="preserve"><value>Columna de origen</value></data>
+  <data name="Review_SourcePreview" xml:space="preserve"><value>Vista previa del origen</value></data>
+  <data name="Review_MoreRows" xml:space="preserve"><value>...y {0} filas más.</value></data>
+  <data name="Review_ColumnNone" xml:space="preserve"><value>(ninguna)</value></data>
+  <data name="Review_TheseRecordsAre" xml:space="preserve"><value>Estos registros son</value></data>
+  <data name="Review_DateFormat" xml:space="preserve"><value>Formato de fecha</value></data>
+  <data name="Review_DateFormatAuto" xml:space="preserve"><value>automático</value></data>
+  <data name="Review_CommaDecimals" xml:space="preserve"><value>Decimales con coma (1.234,56)</value></data>
+  <data name="Review_RememberMapping" xml:space="preserve"><value>Recordar esta asignación</value></data>
+  <data name="Review_MappingName" xml:space="preserve"><value>Nombre de la asignación</value></data>
+  <data name="Review_StageRows" xml:space="preserve"><value>Preparar {0} filas para revisión</value></data>
+  <data name="Review_MapAtLeast" xml:space="preserve"><value>Asigna al menos Nombre del producto o Código, además de Cantidad, para continuar.</value></data>
+
+  <!-- Review rows -->
+  <data name="ReviewRows_Title" xml:space="preserve"><value>Revisar filas</value></data>
+  <data name="ReviewRows_BatchNotFound" xml:space="preserve"><value>No se encontró el lote de importación.</value></data>
+  <data name="ReviewRows_BatchSummary" xml:space="preserve"><value>{0} / {1} filas / {2}</value></data>
+  <data name="ReviewRows_BatchDetail" xml:space="preserve"><value>Detalle del lote</value></data>
+  <data name="ReviewRows_ApplyReadyRows" xml:space="preserve"><value>Aplicar filas listas</value></data>
+  <data name="ReviewRows_ImportAnother" xml:space="preserve"><value>Importar otro</value></data>
+  <data name="ReviewRows_Ready" xml:space="preserve"><value>Listas</value></data>
+  <data name="ReviewRows_NeedsReview" xml:space="preserve"><value>Requieren revisión</value></data>
+  <data name="ReviewRows_Applied" xml:space="preserve"><value>Aplicadas</value></data>
+  <data name="ReviewRows_Rejected" xml:space="preserve"><value>Rechazadas</value></data>
+  <data name="ReviewRows_ApplyConfirm" xml:space="preserve"><value>{0} filas no están listas y NO se aplicarán. ¿Aplicar las {1} filas listas?</value></data>
+  <data name="ReviewRows_ApproveSelected" xml:space="preserve"><value>Aprobar seleccionadas</value></data>
+  <data name="ReviewRows_RejectSelected" xml:space="preserve"><value>Rechazar seleccionadas</value></data>
+  <data name="ReviewRows_ShowingCount" xml:space="preserve"><value>Mostrando {0} de {1} filas</value></data>
+  <data name="ReviewRows_SelectAllVisible" xml:space="preserve"><value>Seleccionar todas las filas visibles</value></data>
+  <data name="ReviewRows_SelectRow" xml:space="preserve"><value>Seleccionar fila {0}</value></data>
+  <data name="ReviewRows_HideSource" xml:space="preserve"><value>Ocultar origen</value></data>
+  <data name="ReviewRows_ShowSource" xml:space="preserve"><value>Origen</value></data>
+  <data name="ReviewRows_OriginalSourceCells" xml:space="preserve"><value>Celdas originales del origen</value></data>
+  <data name="ReviewRows_NoSourceCells" xml:space="preserve"><value>Sin celdas de origen.</value></data>
+  <data name="ReviewRows_ParseIssues" xml:space="preserve"><value>Problemas de lectura</value></data>
+  <data name="ReviewRows_NoIssues" xml:space="preserve"><value>Sin problemas.</value></data>
+  <data name="ReviewRows_AppliedCount" xml:space="preserve"><value>Se aplicaron {0} filas.</value></data>
+  <data name="ReviewRows_ApprovedCount" xml:space="preserve"><value>{0} aprobadas</value></data>
+  <data name="ReviewRows_CouldNotApprove" xml:space="preserve"><value>{0} no se pudieron aprobar (falló la validación)</value></data>
+  <data name="ReviewRows_SkippedCount" xml:space="preserve"><value>{0} omitidas</value></data>
+  <data name="ReviewRows_RejectedCount" xml:space="preserve"><value>{0} rechazadas</value></data>
+
+  <!-- Imports list -->
+  <data name="Imports_Title" xml:space="preserve"><value>Importaciones</value></data>
+  <data name="Imports_NoImports" xml:space="preserve"><value>Aún no hay importaciones.</value></data>
+  <data name="Imports_UploadToStart" xml:space="preserve"><value>Sube un archivo</value></data>
+  <data name="Imports_ToGetStarted" xml:space="preserve"><value>para comenzar.</value></data>
+  <data name="Imports_ColRows" xml:space="preserve"><value>Filas</value></data>
+  <data name="Imports_ColImported" xml:space="preserve"><value>Importado</value></data>
+
+  <!-- Import detail -->
+  <data name="ImportDetail_Title" xml:space="preserve"><value>Detalle de importación</value></data>
+  <data name="ImportDetail_OpenReview" xml:space="preserve"><value>Abrir revisión</value></data>
+  <data name="ImportDetail_TotalRows" xml:space="preserve"><value>Total de filas</value></data>
+  <data name="ImportDetail_SourceProfile" xml:space="preserve"><value>Perfil de origen</value></data>
+  <data name="ImportDetail_ReviewRows" xml:space="preserve"><value>Revisar filas</value></data>
+  <data name="ImportDetail_RawSourceRows" xml:space="preserve"><value>Filas originales</value></data>
+  <data name="ImportDetail_NoRawRows" xml:space="preserve"><value>No se capturaron filas originales del origen.</value></data>
+  <data name="ImportDetail_CreatedMovements" xml:space="preserve"><value>Movimientos creados</value></data>
+  <data name="ImportDetail_NoMovements" xml:space="preserve"><value>Aún no se han creado movimientos a partir de este lote.</value></data>
+  <data name="ImportDetail_SourceRow" xml:space="preserve"><value>Fila de origen</value></data>
+
+  <!-- Inventory -->
+  <data name="Inventory_Title" xml:space="preserve"><value>Inventario</value></data>
+  <data name="Inventory_NoProducts" xml:space="preserve"><value>Aún no hay productos.</value></data>
+  <data name="Inventory_ImportSomeRecords" xml:space="preserve"><value>Importa algunos registros</value></data>
+  <data name="Inventory_ToGetStarted" xml:space="preserve"><value>para comenzar.</value></data>
+  <data name="Inventory_ProductsLowSummary" xml:space="preserve"><value>{0} productos / {1} con inventario bajo</value></data>
+  <data name="Inventory_StockView" xml:space="preserve"><value>Vista de existencias</value></data>
+  <data name="Inventory_Global" xml:space="preserve"><value>Global</value></data>
+  <data name="Inventory_ByLocation" xml:space="preserve"><value>Por almacén</value></data>
+  <data name="Inventory_ExportCsv" xml:space="preserve"><value>Exportar CSV</value></data>
+  <data name="Inventory_OnHand" xml:space="preserve"><value>Existencias</value></data>
+  <data name="Inventory_ReorderAt" xml:space="preserve"><value>Reordenar en</value></data>
+  <data name="Inventory_TotalValue" xml:space="preserve"><value>Importe total</value></data>
+  <data name="Inventory_ValueCoverage" xml:space="preserve"><value>el importe cubre {0} de {1} productos (sin datos de costo para el resto)</value></data>
+  <data name="Inventory_LocationNote" xml:space="preserve"><value>Los saldos por almacén pueden ser negativos cuando los registros de salida nombran una tienda sin filas de traspaso correspondientes; las existencias globales son el total consolidado.</value></data>
+  <data name="Inventory_StatusLow" xml:space="preserve"><value>Bajo</value></data>
+  <data name="Inventory_StatusOk" xml:space="preserve"><value>OK</value></data>
+
+  <!-- Movements -->
+  <data name="Movements_Title" xml:space="preserve"><value>Movimientos</value></data>
+  <data name="Movements_NoMovements" xml:space="preserve"><value>Aún no hay movimientos.</value></data>
+  <data name="Movements_ImportSomeRecords" xml:space="preserve"><value>Importa algunos registros</value></data>
+  <data name="Movements_ToGetStarted" xml:space="preserve"><value>para comenzar.</value></data>
+  <data name="Movements_MostRecent" xml:space="preserve"><value>Los {0} movimientos más recientes</value></data>
+  <data name="Movements_SourceFallback" xml:space="preserve"><value>origen</value></data>
+
+  <!-- Settings -->
+  <data name="Settings_Title" xml:space="preserve"><value>Configuración</value></data>
+  <data name="Settings_AiFeatures" xml:space="preserve"><value>Funciones de IA (importar fotos y sugerencias de asignación)</value></data>
+  <data name="Settings_AiConfigured" xml:space="preserve"><value>Configurada</value></data>
+  <data name="Settings_AiNotConfigured" xml:space="preserve"><value>Sin configurar — la importación de fotos y las sugerencias de IA están deshabilitadas; la importación de hojas de cálculo funciona sin conexión.</value></data>
+  <data name="Settings_SavedKey" xml:space="preserve"><value>Clave guardada:</value></data>
+  <data name="Settings_AnthropicApiKey" xml:space="preserve"><value>Clave de API de Anthropic</value></data>
+  <data name="Settings_PlaceholderReplaceKey" xml:space="preserve"><value>Pega una clave nueva para reemplazar la guardada</value></data>
+  <data name="Settings_PlaceholderPasteKey" xml:space="preserve"><value>Pega una clave de API de Anthropic</value></data>
+  <data name="Settings_RemoveKey" xml:space="preserve"><value>Quitar clave</value></data>
+  <data name="Settings_MsgSaved" xml:space="preserve"><value>Guardado</value></data>
+  <data name="Settings_MsgRemoved" xml:space="preserve"><value>Eliminado</value></data>
+  <data name="Settings_ReorderThresholds" xml:space="preserve"><value>Umbrales de reorden</value></data>
+  <data name="Settings_ReorderIntro" xml:space="preserve"><value>Define el nivel en el que un producto se marca como bajo en el panel.</value></data>
+  <data name="Settings_NoProductsFirst" xml:space="preserve"><value>Aún no hay productos.</value></data>
+  <data name="Settings_ImportSomeRecordsFirst" xml:space="preserve"><value>Importa algunos registros</value></data>
+  <data name="Settings_First" xml:space="preserve"><value>primero.</value></data>
+  <data name="Settings_SavedMappings" xml:space="preserve"><value>Asignaciones guardadas</value></data>
+  <data name="Settings_SavedMappingsIntro" xml:space="preserve"><value>Formatos que el sistema reconoce automáticamente. Elimina uno para que te pida confirmarlo de nuevo la próxima vez.</value></data>
+  <data name="Settings_NoSavedMappings" xml:space="preserve"><value>Aún no hay asignaciones guardadas.</value></data>
+  <data name="Settings_Language" xml:space="preserve"><value>Idioma / Language</value></data>
+  <data name="Settings_LanguageSpanish" xml:space="preserve"><value>Español</value></data>
+  <data name="Settings_LanguageEnglish" xml:space="preserve"><value>English</value></data>
+
+  <!-- Error -->
+  <data name="Error_Title" xml:space="preserve"><value>Error</value></data>
+  <data name="Error_Heading" xml:space="preserve"><value>Error.</value></data>
+  <data name="Error_SubHeading" xml:space="preserve"><value>Ocurrió un error al procesar tu solicitud.</value></data>
+  <data name="Error_RequestId" xml:space="preserve"><value>ID de solicitud:</value></data>
+  <data name="Error_DevModeHeading" xml:space="preserve"><value>Modo de desarrollo</value></data>
+  <data name="Error_DevModeBody" xml:space="preserve"><value>Cambiar al entorno de desarrollo mostrará información más detallada sobre el error ocurrido.</value></data>
+  <data name="Error_DevModeWarning" xml:space="preserve"><value>El entorno de desarrollo no debe habilitarse en aplicaciones desplegadas. Puede exponer información sensible de las excepciones a los usuarios finales. Para depuración local, habilita el entorno de desarrollo estableciendo la variable de entorno ASPNETCORE_ENVIRONMENT en Development y reiniciando la aplicación.</value></data>
+
+  <!-- Not found -->
+  <data name="NotFound_Heading" xml:space="preserve"><value>No encontrado</value></data>
+  <data name="NotFound_Body" xml:space="preserve"><value>Lo sentimos, el contenido que buscas no existe.</value></data>
+
+  <!-- Enum: MovementKind -->
+  <data name="MovementKind_In" xml:space="preserve"><value>Entrada</value></data>
+  <data name="MovementKind_Out" xml:space="preserve"><value>Salida</value></data>
+  <data name="MovementKind_Adjustment" xml:space="preserve"><value>Ajuste</value></data>
+
+  <!-- Enum: ReviewRowStatus -->
+  <data name="ReviewRowStatus_NeedsReview" xml:space="preserve"><value>Requiere revisión</value></data>
+  <data name="ReviewRowStatus_Ready" xml:space="preserve"><value>Lista</value></data>
+  <data name="ReviewRowStatus_Applied" xml:space="preserve"><value>Aplicada</value></data>
+  <data name="ReviewRowStatus_Rejected" xml:space="preserve"><value>Rechazada</value></data>
+
+  <!-- Enum: ImportStatus -->
+  <data name="ImportStatus_Pending" xml:space="preserve"><value>Pendiente</value></data>
+  <data name="ImportStatus_AwaitingReview" xml:space="preserve"><value>En revisión</value></data>
+  <data name="ImportStatus_Imported" xml:space="preserve"><value>Importado</value></data>
+  <data name="ImportStatus_Failed" xml:space="preserve"><value>Falló</value></data>
+
+  <!-- Enum: SourceType -->
+  <data name="SourceType_Excel" xml:space="preserve"><value>Excel</value></data>
+  <data name="SourceType_Image" xml:space="preserve"><value>Imagen</value></data>
+  <data name="SourceType_Csv" xml:space="preserve"><value>CSV</value></data>
+
+  <!-- Enum: RecordType -->
+  <data name="RecordType_Unknown" xml:space="preserve"><value>Desconocido</value></data>
+  <data name="RecordType_Arrivals" xml:space="preserve"><value>Entradas (inventario que llega)</value></data>
+  <data name="RecordType_Sales" xml:space="preserve"><value>Ventas (salidas)</value></data>
+  <data name="RecordType_StockCount" xml:space="preserve"><value>Conteo de inventario (absoluto)</value></data>
+  <data name="RecordType_Mixed" xml:space="preserve"><value>Mixto (dirección por fila)</value></data>
+
+  <!-- CanonicalField display names (column-mapping table) -->
+  <data name="CanonicalField_ProductName" xml:space="preserve"><value>Nombre del producto</value></data>
+  <data name="CanonicalField_Sku" xml:space="preserve"><value>Código</value></data>
+  <data name="CanonicalField_Category" xml:space="preserve"><value>Categoría</value></data>
+  <data name="CanonicalField_Unit" xml:space="preserve"><value>Unidad</value></data>
+  <data name="CanonicalField_Quantity" xml:space="preserve"><value>Cantidad</value></data>
+  <data name="CanonicalField_UnitPrice" xml:space="preserve"><value>Precio unitario</value></data>
+  <data name="CanonicalField_Currency" xml:space="preserve"><value>Moneda</value></data>
+  <data name="CanonicalField_Date" xml:space="preserve"><value>Fecha</value></data>
+  <data name="CanonicalField_Location" xml:space="preserve"><value>Almacén</value></data>
+  <data name="CanonicalField_PartyName" xml:space="preserve"><value>Proveedor/Cliente</value></data>
+  <data name="CanonicalField_Direction" xml:space="preserve"><value>Dirección</value></data>
+  <data name="CanonicalField_Note" xml:space="preserve"><value>Nota</value></data>
+</root>

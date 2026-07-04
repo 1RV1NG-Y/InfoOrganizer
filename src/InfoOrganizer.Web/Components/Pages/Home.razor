@@ -3,52 +3,53 @@
 @using System.Globalization
 @inject TrackingService Tracking
 @inject SeedService Seeder
+@inject IStringLocalizer<AppStrings> L
 
-<PageTitle>Dashboard</PageTitle>
+<PageTitle>@L["Home_Title"]</PageTitle>
 
 <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-4">
-    <h1 class="mb-0">Dashboard</h1>
-    <div class="btn-group btn-group-sm" role="group" aria-label="Summary period">
-        <button type="button" class="btn @PeriodButtonClass(SummaryPeriod.AllTime)" @onclick="() => SetPeriodAsync(SummaryPeriod.AllTime)">All time</button>
-        <button type="button" class="btn @PeriodButtonClass(SummaryPeriod.ThisWeek)" @onclick="() => SetPeriodAsync(SummaryPeriod.ThisWeek)">This week</button>
-        <button type="button" class="btn @PeriodButtonClass(SummaryPeriod.ThisMonth)" @onclick="() => SetPeriodAsync(SummaryPeriod.ThisMonth)">This month</button>
+    <h1 class="mb-0">@L["Home_Title"]</h1>
+    <div class="btn-group btn-group-sm" role="group" aria-label="@L["Home_SummaryPeriod"]">
+        <button type="button" class="btn @PeriodButtonClass(SummaryPeriod.AllTime)" @onclick="() => SetPeriodAsync(SummaryPeriod.AllTime)">@L["Home_AllTime"]</button>
+        <button type="button" class="btn @PeriodButtonClass(SummaryPeriod.ThisWeek)" @onclick="() => SetPeriodAsync(SummaryPeriod.ThisWeek)">@L["Home_ThisWeek"]</button>
+        <button type="button" class="btn @PeriodButtonClass(SummaryPeriod.ThisMonth)" @onclick="() => SetPeriodAsync(SummaryPeriod.ThisMonth)">@L["Home_ThisMonth"]</button>
     </div>
 </div>
 
 @if (_summary is null)
 {
-    <p>Loading…</p>
+    <p>@L["Common_Loading"]</p>
 }
 else
 {
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-lg-3">
             <div class="card text-bg-light"><div class="card-body">
-                <div class="text-muted small">Products</div>
+                <div class="text-muted small">@L["Home_Products"]</div>
                 <div class="fs-3">@_summary.ProductCount</div>
             </div></div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="card @(_summary.LowStockCount > 0 ? "text-bg-warning" : "text-bg-light")"><div class="card-body">
-                <div class="small">Low stock</div>
+                <div class="small">@L["Home_LowStock"]</div>
                 <div class="fs-3">@_summary.LowStockCount</div>
             </div></div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="card text-bg-light"><div class="card-body">
-                <div class="text-muted small">Total received</div>
+                <div class="text-muted small">@L["Home_TotalReceived"]</div>
                 <div class="fs-3">@_summary.TotalIn</div>
             </div></div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="card text-bg-light"><div class="card-body">
-                <div class="text-muted small">Total sold / out</div>
+                <div class="text-muted small">@L["Home_TotalSoldOut"]</div>
                 <div class="fs-3">@_summary.TotalOut</div>
             </div></div>
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="card text-bg-light"><div class="card-body">
-                <div class="text-muted small">Purchases (value)</div>
+                <div class="text-muted small">@L["Home_PurchasesValue"]</div>
                 <div class="fs-3">
                     @if (_summary.PurchaseValuesByCurrency.Count == 0)
                     {
@@ -73,7 +74,7 @@ else
         </div>
         <div class="col-sm-6 col-lg-3">
             <div class="card text-bg-light"><div class="card-body">
-                <div class="text-muted small">Sales (value)</div>
+                <div class="text-muted small">@L["Home_SalesValue"]</div>
                 <div class="fs-3">
                     @if (_summary.SalesValuesByCurrency.Count == 0)
                     {
@@ -99,13 +100,13 @@ else
     </div>
 
     <div class="mb-4">
-        <a class="btn btn-primary" href="upload">Import a file or photo</a>
-        <a class="btn btn-outline-secondary" href="inventory">View inventory</a>
+        <a class="btn btn-primary" href="upload">@L["Home_ImportFileOrPhoto"]</a>
+        <a class="btn btn-outline-secondary" href="inventory">@L["Home_ViewInventory"]</a>
     </div>
 
     @if (_low.Count > 0)
     {
-        <h2 class="h5">Low stock</h2>
+        <h2 class="h5">@L["Home_LowStock"]</h2>
         <ul class="list-group">
             @foreach (var l in _low)
             {
@@ -118,13 +119,13 @@ else
     }
     else if (_summary.ProductCount == 0)
     {
-        <p class="text-muted">No data yet. Import a spreadsheet or a photo of a paper record — or load a sample to look around.</p>
+        <p class="text-muted">@L["Home_NoDataYet"]</p>
         <button class="btn btn-outline-primary" @onclick="LoadSampleAsync" disabled="@_seeding">
             @if (_seeding)
             {
                 <span class="spinner-border spinner-border-sm me-1"></span>
             }
-            Load sample data
+            @L["Home_LoadSampleData"]
         </button>
     }
 }
@@ -197,13 +198,13 @@ else
     private static string FormatMoney(decimal value, string currency) =>
         $"{value.ToString("C", CultureInfo.CurrentCulture)} {currency}";
 
-    private static string CoverageNote(int pricedCount, int totalCount)
+    private string CoverageNote(int pricedCount, int totalCount)
     {
         if (totalCount == 0 || pricedCount == totalCount)
             return "";
         return pricedCount == 0
-            ? "no cost data"
-            : $"based on {pricedCount} of {totalCount} movements with price data";
+            ? L["Coverage_NoCostData"]
+            : L["Coverage_BasedOn", pricedCount, totalCount];
     }
 
     private enum SummaryPeriod

@@ -2,28 +2,29 @@
 @rendermode InteractiveServer
 @using System.Text.Json
 @inject ImportService Importer
+@inject IStringLocalizer<AppStrings> L
 
-<PageTitle>Review rows</PageTitle>
+<PageTitle>@L["ReviewRows_Title"]</PageTitle>
 
 @if (_batch is null)
 {
-    <h1>Review rows</h1>
+    <h1>@L["ReviewRows_Title"]</h1>
     @if (_missing)
     {
-        <p class="text-muted">Import batch not found.</p>
+        <p class="text-muted">@L["ReviewRows_BatchNotFound"]</p>
     }
     else
     {
-        <p>Loading...</p>
+        <p>@L["Common_Loading"]</p>
     }
 }
 else
 {
     <div class="d-flex justify-content-between align-items-start mb-3">
         <div>
-            <h1>Review rows</h1>
-            <p class="text-muted mb-0">@_batch.FileName / @_batch.RowCount rows / @_batch.SourceType</p>
-            <p class="mb-0"><a href="@($"/imports/{BatchId}")">Batch detail</a></p>
+            <h1>@L["ReviewRows_Title"]</h1>
+            <p class="text-muted mb-0">@L["ReviewRows_BatchSummary", _batch.FileName, _batch.RowCount, _batch.SourceType.Display(L)]</p>
+            <p class="mb-0"><a href="@($"/imports/{BatchId}")">@L["ReviewRows_BatchDetail"]</a></p>
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-primary" disabled="@(!HasReadyRows || _applying)" @onclick="RequestApplyAsync">
@@ -31,34 +32,34 @@ else
                 {
                     <span class="spinner-border spinner-border-sm me-1"></span>
                 }
-                Apply ready rows
+                @L["ReviewRows_ApplyReadyRows"]
             </button>
-            <a class="btn btn-outline-secondary" href="upload">Import another</a>
+            <a class="btn btn-outline-secondary" href="upload">@L["ReviewRows_ImportAnother"]</a>
         </div>
     </div>
 
     <div class="row g-2 mb-3">
         <div class="col-sm-6 col-lg-3">
             <button type="button" class="@SummaryCardClass(ReviewRowStatus.Ready)" aria-pressed="@(_statusFilter == ReviewRowStatus.Ready)" @onclick="() => ToggleStatusFilter(ReviewRowStatus.Ready)">
-                <div class="text-muted small">Ready</div>
+                <div class="text-muted small">@L["ReviewRows_Ready"]</div>
                 <div class="fs-4">@Count(ReviewRowStatus.Ready)</div>
             </button>
         </div>
         <div class="col-sm-6 col-lg-3">
             <button type="button" class="@SummaryCardClass(ReviewRowStatus.NeedsReview)" aria-pressed="@(_statusFilter == ReviewRowStatus.NeedsReview)" @onclick="() => ToggleStatusFilter(ReviewRowStatus.NeedsReview)">
-                <div class="text-muted small">Needs review</div>
+                <div class="text-muted small">@L["ReviewRows_NeedsReview"]</div>
                 <div class="fs-4">@Count(ReviewRowStatus.NeedsReview)</div>
             </button>
         </div>
         <div class="col-sm-6 col-lg-3">
             <button type="button" class="@SummaryCardClass(ReviewRowStatus.Applied)" aria-pressed="@(_statusFilter == ReviewRowStatus.Applied)" @onclick="() => ToggleStatusFilter(ReviewRowStatus.Applied)">
-                <div class="text-muted small">Applied</div>
+                <div class="text-muted small">@L["ReviewRows_Applied"]</div>
                 <div class="fs-4">@Count(ReviewRowStatus.Applied)</div>
             </button>
         </div>
         <div class="col-sm-6 col-lg-3">
             <button type="button" class="@SummaryCardClass(ReviewRowStatus.Rejected)" aria-pressed="@(_statusFilter == ReviewRowStatus.Rejected)" @onclick="() => ToggleStatusFilter(ReviewRowStatus.Rejected)">
-                <div class="text-muted small">Rejected</div>
+                <div class="text-muted small">@L["ReviewRows_Rejected"]</div>
                 <div class="fs-4">@Count(ReviewRowStatus.Rejected)</div>
             </button>
         </div>
@@ -67,10 +68,10 @@ else
     @if (_confirmingApply)
     {
         <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <div>@NeedsReviewRows rows are not ready and will NOT be applied. Apply the @ReadyRows ready rows?</div>
+            <div>@L["ReviewRows_ApplyConfirm", NeedsReviewRows, ReadyRows]</div>
             <div class="btn-group btn-group-sm">
-                <button class="btn btn-warning" disabled="@_applying" @onclick="ConfirmApplyReadyAsync">Confirm</button>
-                <button class="btn btn-outline-secondary" disabled="@_applying" @onclick="CancelApplyConfirmation">Cancel</button>
+                <button class="btn btn-warning" disabled="@_applying" @onclick="ConfirmApplyReadyAsync">@L["Common_Confirm"]</button>
+                <button class="btn btn-outline-secondary" disabled="@_applying" @onclick="CancelApplyConfirmation">@L["Common_Cancel"]</button>
             </div>
         </div>
     }
@@ -85,12 +86,12 @@ else
 
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
         <div class="btn-group btn-group-sm">
-            <button class="btn btn-outline-success" disabled="@(!HasSelection || _bulkWorking)" @onclick="ApproveSelectedAsync">Approve selected</button>
-            <button class="btn btn-outline-danger" disabled="@(!HasSelection || _bulkWorking)" @onclick="RejectSelectedAsync">Reject selected</button>
+            <button class="btn btn-outline-success" disabled="@(!HasSelection || _bulkWorking)" @onclick="ApproveSelectedAsync">@L["ReviewRows_ApproveSelected"]</button>
+            <button class="btn btn-outline-danger" disabled="@(!HasSelection || _bulkWorking)" @onclick="RejectSelectedAsync">@L["ReviewRows_RejectSelected"]</button>
         </div>
         @if (_statusFilter is not null)
         {
-            <div class="text-muted small">Showing @VisibleRows.Count of @_batch.Rows.Count rows</div>
+            <div class="text-muted small">@L["ReviewRows_ShowingCount", VisibleRows.Count, _batch.Rows.Count]</div>
         }
     </div>
 
@@ -99,23 +100,23 @@ else
             <thead>
                 <tr>
                     <th>
-                        <input class="form-check-input" type="checkbox" checked="@AllVisibleSelectableSelected" disabled="@(!HasVisibleSelectableRows)" aria-label="Select all visible rows" @onchange="ToggleSelectVisible" />
+                        <input class="form-check-input" type="checkbox" checked="@AllVisibleSelectableSelected" disabled="@(!HasVisibleSelectableRows)" aria-label="@L["ReviewRows_SelectAllVisible"]" @onchange="ToggleSelectVisible" />
                     </th>
-                    <th>Row</th>
-                    <th>Status</th>
-                    <th>Confidence</th>
-                    <th>Issues</th>
-                    <th>Product</th>
-                    <th>Code</th>
-                    <th>Type</th>
-                    <th class="text-end">Qty</th>
-                    <th>Location</th>
-                    <th class="text-end">Unit price</th>
-                    <th>Cur</th>
-                    <th>Date</th>
-                    <th>Party</th>
-                    <th>Note</th>
-                    <th>Source</th>
+                    <th>@L["Common_Row"]</th>
+                    <th>@L["Common_Status"]</th>
+                    <th>@L["Common_Confidence"]</th>
+                    <th>@L["Common_Issues"]</th>
+                    <th>@L["Common_Product"]</th>
+                    <th>@L["Common_Code"]</th>
+                    <th>@L["Common_Type"]</th>
+                    <th class="text-end">@L["Common_QuantityShort"]</th>
+                    <th>@L["Common_Location"]</th>
+                    <th class="text-end">@L["Common_UnitPrice"]</th>
+                    <th>@L["Common_CurrencyShort"]</th>
+                    <th>@L["Common_Date"]</th>
+                    <th>@L["Common_Party"]</th>
+                    <th>@L["Common_Note"]</th>
+                    <th>@L["Common_Source"]</th>
                     <th></th>
                 </tr>
             </thead>
@@ -127,10 +128,10 @@ else
                     var locked = row.Status == ReviewRowStatus.Applied;
                     <tr>
                         <td>
-                            <input class="form-check-input" type="checkbox" checked="@_selectedRowIds.Contains(row.Id)" disabled="@locked" aria-label="@($"Select row {row.RowIndex + 1}")" @onchange="e => ToggleSelected(row.Id, e.Value)" />
+                            <input class="form-check-input" type="checkbox" checked="@_selectedRowIds.Contains(row.Id)" disabled="@locked" aria-label="@(L["ReviewRows_SelectRow", row.RowIndex + 1])" @onchange="e => ToggleSelected(row.Id, e.Value)" />
                         </td>
                         <td>@(row.RowIndex + 1)</td>
-                        <td><span class="badge @StatusClass(row.Status)">@row.Status</span></td>
+                        <td><span class="badge @StatusClass(row.Status)">@row.Status.Display(L)</span></td>
                         <td>@($"{row.Confidence:P0}")</td>
                         <td style="min-width: 12rem">
                             @foreach (var issue in Issues(row))
@@ -144,7 +145,7 @@ else
                             <select class="form-select form-select-sm" style="width: 8rem" @bind="edit.Kind" disabled="@locked">
                                 @foreach (var kind in Enum.GetValues<MovementKind>())
                                 {
-                                    <option value="@kind">@kind</option>
+                                    <option value="@kind">@kind.Display(L)</option>
                                 }
                             </select>
                         </td>
@@ -157,16 +158,16 @@ else
                         <td><input class="form-control form-control-sm" style="width: 12rem" @bind="edit.Note" disabled="@locked" /></td>
                         <td>
                             <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => ToggleSource(row.Id)">
-                                @(IsSourceExpanded(row.Id) ? "Hide source" : "Source")
+                                @(IsSourceExpanded(row.Id) ? L["ReviewRows_HideSource"] : L["ReviewRows_ShowSource"])
                             </button>
                         </td>
                         <td>
                             @if (!locked)
                             {
                                 <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-secondary" @onclick="() => SaveRowAsync(row.Id)">Save</button>
-                                    <button class="btn btn-outline-success" @onclick="() => ApproveRowAsync(row.Id)">Approve</button>
-                                    <button class="btn btn-outline-danger" @onclick="() => RejectRowAsync(row.Id)">Reject</button>
+                                    <button class="btn btn-outline-secondary" @onclick="() => SaveRowAsync(row.Id)">@L["Common_Save"]</button>
+                                    <button class="btn btn-outline-success" @onclick="() => ApproveRowAsync(row.Id)">@L["Common_Approve"]</button>
+                                    <button class="btn btn-outline-danger" @onclick="() => RejectRowAsync(row.Id)">@L["Common_Reject"]</button>
                                 </div>
                             }
                         </td>
@@ -177,13 +178,13 @@ else
                             <td colspan="17" class="bg-white">
                                 <div class="row g-3 p-2">
                                     <div class="col-lg-8">
-                                        <div class="small fw-semibold mb-1">Original source cells</div>
+                                        <div class="small fw-semibold mb-1">@L["ReviewRows_OriginalSourceCells"]</div>
                                         @{
                                             var cells = SourceCells(detail.RawDataJson);
                                         }
                                         @if (cells.Count == 0)
                                         {
-                                            <p class="text-muted small mb-0">No source cells.</p>
+                                            <p class="text-muted small mb-0">@L["ReviewRows_NoSourceCells"]</p>
                                         }
                                         else
                                         {
@@ -201,13 +202,13 @@ else
                                         }
                                     </div>
                                     <div class="col-lg-4">
-                                        <div class="small fw-semibold mb-1">Parse issues</div>
+                                        <div class="small fw-semibold mb-1">@L["ReviewRows_ParseIssues"]</div>
                                         @{
                                             var issues = Issues(row);
                                         }
                                         @if (issues.Count == 0)
                                         {
-                                            <p class="text-muted small mb-0">No issues.</p>
+                                            <p class="text-muted small mb-0">@L["ReviewRows_NoIssues"]</p>
                                         }
                                         else
                                         {
@@ -400,7 +401,7 @@ else
         {
             var result = await Importer.ApplyReadyRowsAsync(BatchId);
             _messageClass = "alert-success";
-            _message = $"Applied {result.ImportedRows} rows.";
+            _message = L["ReviewRows_AppliedCount", result.ImportedRows];
             _confirmingApply = false;
             await LoadAsync();
         }
@@ -537,21 +538,21 @@ else
 
     private static bool IsChecked(object? value) => value is bool checkedValue && checkedValue;
 
-    private static string ApprovalSummary(ReviewRowsActionResult result)
+    private string ApprovalSummary(ReviewRowsActionResult result)
     {
-        var parts = new List<string> { $"{result.ApprovedRows} approved" };
+        var parts = new List<string> { L["ReviewRows_ApprovedCount", result.ApprovedRows] };
         if (result.FailedRows > 0)
-            parts.Add($"{result.FailedRows} could not be approved (validation failed)");
+            parts.Add(L["ReviewRows_CouldNotApprove", result.FailedRows]);
         if (result.SkippedRows > 0)
-            parts.Add($"{result.SkippedRows} skipped");
+            parts.Add(L["ReviewRows_SkippedCount", result.SkippedRows]);
         return string.Join(", ", parts) + ".";
     }
 
-    private static string RejectSummary(ReviewRowsActionResult result)
+    private string RejectSummary(ReviewRowsActionResult result)
     {
-        var parts = new List<string> { $"{result.RejectedRows} rejected" };
+        var parts = new List<string> { L["ReviewRows_RejectedCount", result.RejectedRows] };
         if (result.SkippedRows > 0)
-            parts.Add($"{result.SkippedRows} skipped");
+            parts.Add(L["ReviewRows_SkippedCount", result.SkippedRows]);
         return string.Join(", ", parts) + ".";
     }
 }

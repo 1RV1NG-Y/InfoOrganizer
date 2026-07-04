@@ -1,39 +1,40 @@
 @page "/movements"
 @rendermode InteractiveServer
 @inject TrackingService Tracking
+@inject IStringLocalizer<AppStrings> L
 
-<PageTitle>Movements</PageTitle>
+<PageTitle>@L["Movements_Title"]</PageTitle>
 
-<h1>Movements</h1>
+<h1>@L["Movements_Title"]</h1>
 
 @if (_movements is null)
 {
-    <p>Loading…</p>
+    <p>@L["Common_Loading"]</p>
 }
 else if (_movements.Count == 0)
 {
-    <p class="text-muted">No movements yet. <a href="upload">Import some records</a> to get started.</p>
+    <p class="text-muted">@L["Movements_NoMovements"] <a href="upload">@L["Movements_ImportSomeRecords"]</a> @L["Movements_ToGetStarted"]</p>
 }
 else
 {
-    <p class="text-muted">Most recent @_movements.Count movements</p>
+    <p class="text-muted">@L["Movements_MostRecent", _movements.Count]</p>
     <div class="table-responsive">
         <QuickGrid Items="_movements.AsQueryable()" class="table table-sm table-striped align-middle">
-            <PropertyColumn Property="@(m => m.OccurredOn)" Title="Date" Sortable="true" />
-            <PropertyColumn Property="@(m => m.Product!.Name)" Title="Product" Sortable="true" />
-            <PropertyColumn Property="@(m => m.LocationName)" Title="Location" Sortable="true" />
-            <TemplateColumn Title="Type">
-                <span class="badge @KindClass(context.Kind)">@context.Kind</span>
+            <PropertyColumn Property="@(m => m.OccurredOn)" Title="@(L["Common_Date"])" Sortable="true" />
+            <PropertyColumn Property="@(m => m.Product!.Name)" Title="@(L["Common_Product"])" Sortable="true" />
+            <PropertyColumn Property="@(m => m.LocationName)" Title="@(L["Common_Location"])" Sortable="true" />
+            <TemplateColumn Title="@(L["Common_Type"])">
+                <span class="badge @KindClass(context.Kind)">@context.Kind.Display(L)</span>
             </TemplateColumn>
-            <PropertyColumn Property="@(m => m.Quantity)" Title="Qty" Align="Align.End" />
-            <PropertyColumn Property="@(m => m.UnitPrice)" Title="Unit price" Align="Align.End" />
-            <TemplateColumn Title="Value" Align="Align.End">@LineValue(context)</TemplateColumn>
-            <PropertyColumn Property="@(m => m.Currency)" Title="Cur" />
-            <PropertyColumn Property="@(m => m.PartyName)" Title="Party" />
-            <TemplateColumn Title="Source">
-                <a href="@($"/imports/{context.ImportBatchId}")">@(context.ImportBatch?.FileName ?? "source")</a>
+            <PropertyColumn Property="@(m => m.Quantity)" Title="@(L["Common_QuantityShort"])" Align="Align.End" />
+            <PropertyColumn Property="@(m => m.UnitPrice)" Title="@(L["Common_UnitPrice"])" Align="Align.End" />
+            <TemplateColumn Title="@(L["Common_Value"])" Align="Align.End">@LineValue(context)</TemplateColumn>
+            <PropertyColumn Property="@(m => m.Currency)" Title="@(L["Common_CurrencyShort"])" />
+            <PropertyColumn Property="@(m => m.PartyName)" Title="@(L["Common_Party"])" />
+            <TemplateColumn Title="@(L["Common_Source"])">
+                <a href="@($"/imports/{context.ImportBatchId}")">@(context.ImportBatch?.FileName ?? L["Movements_SourceFallback"].Value)</a>
             </TemplateColumn>
-            <PropertyColumn Property="@(m => m.Note)" Title="Note" />
+            <PropertyColumn Property="@(m => m.Note)" Title="@(L["Common_Note"])" />
         </QuickGrid>
     </div>
 }

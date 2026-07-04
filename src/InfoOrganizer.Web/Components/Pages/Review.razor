@@ -3,30 +3,31 @@
 @inject ImportService Importer
 @inject ImportSession Session
 @inject NavigationManager Nav
+@inject IStringLocalizer<AppStrings> L
 
-<PageTitle>Review mapping</PageTitle>
+<PageTitle>@L["Review_Title"]</PageTitle>
 
 @if (!Session.HasWork)
 {
-    <h1>Review mapping</h1>
-    <p class="text-muted">Nothing to review. <a href="upload">Upload a file</a> first.</p>
+    <h1>@L["Review_Title"]</h1>
+    <p class="text-muted">@L["Review_NothingToReview"] <a href="upload">@L["Review_UploadFileFirst"]</a></p>
 }
 else
 {
     var preview = Session.Previews[_index];
     var table = preview.Table;
 
-    <h1>Review mapping</h1>
+    <h1>@L["Review_Title"]</h1>
 
     @if (Session.Previews.Count > 1)
     {
         <div class="mb-3">
-            <label class="form-label">Sheet / table</label>
+            <label class="form-label">@L["Review_SheetOrTable"]</label>
             <select class="form-select w-auto" @bind="_index" @bind:after="EnsureFields">
                 @for (var i = 0; i < Session.Previews.Count; i++)
                 {
                     var p = Session.Previews[i];
-                    <option value="@i">@(p.Table.Meta.SheetName ?? p.FileName) (@p.Table.Rows.Count rows)</option>
+                    <option value="@i">@(p.Table.Meta.SheetName ?? p.FileName) (@L["Review_RowsSuffix", p.Table.Rows.Count])</option>
                 }
             </select>
         </div>
@@ -34,27 +35,29 @@ else
 
     @if (!preview.Resolution.RequiresConfirmation)
     {
-        <div class="alert alert-info">Recognized format. Review the mapping, then stage rows before they affect inventory.</div>
+        <div class="alert alert-info">@L["Review_RecognizedFormat"]</div>
     }
     else
     {
         <div class="alert alert-secondary">
-            Proposed by @preview.Resolution.Source@(string.IsNullOrEmpty(Proposal.Rationale) ? "" : $" - {Proposal.Rationale}")
+            @(string.IsNullOrEmpty(Proposal.Rationale)
+                ? L["Review_ProposedBy", preview.Resolution.Source].Value
+                : L["Review_ProposedByWithRationale", preview.Resolution.Source, Proposal.Rationale].Value)
         </div>
     }
 
     <div class="row">
         <div class="col-lg-6">
-            <h2 class="h5">Column mapping</h2>
+            <h2 class="h5">@L["Review_ColumnMapping"]</h2>
             <table class="table table-sm align-middle">
-                <thead><tr><th>Field</th><th>Source column</th><th>Confidence</th></tr></thead>
+                <thead><tr><th>@L["Review_Field"]</th><th>@L["Review_SourceColumn"]</th><th>@L["Common_Confidence"]</th></tr></thead>
                 <tbody>
                     @foreach (var info in CanonicalSchema.Fields)
                     {
                         var fm = Field(info.Field);
                         <tr>
                             <td>
-                                @info.Field
+                                @info.Field.Display(L)
                                 @if (info.Required)
                                 {
                                     <span class="text-danger">*</span>
@@ -64,7 +67,7 @@ else
                                 <select class="form-select form-select-sm"
                                         value="@(fm.SourceColumn ?? "")"
                                         @onchange="e => SetColumn(info.Field, e.Value?.ToString())">
-                                    <option value="">(none)</option>
+                                    <option value="">@L["Review_ColumnNone"]</option>
                                     @foreach (var c in table.Columns)
                                     {
                                         <option value="@c.Name">@c.Name</option>
@@ -84,7 +87,7 @@ else
         </div>
 
         <div class="col-lg-6">
-            <h2 class="h5">Source preview</h2>
+            <h2 class="h5">@L["Review_SourcePreview"]</h2>
             <div class="table-responsive" style="max-height: 320px; overflow:auto;">
                 <table class="table table-sm table-bordered small">
                     <thead><tr>@foreach (var c in table.Columns) { <th>@c.Name</th> }</tr></thead>
@@ -98,7 +101,7 @@ else
             </div>
             @if (table.Rows.Count > 8)
             {
-                <p class="text-muted small">...and @(table.Rows.Count - 8) more rows.</p>
+                <p class="text-muted small">@L["Review_MoreRows", table.Rows.Count - 8]</p>
             }
         </div>
     </div>
@@ -106,26 +109,26 @@ else
     <hr />
     <div class="row g-3 align-items-end">
         <div class="col-auto">
-            <label class="form-label">These records are</label>
+            <label class="form-label">@L["Review_TheseRecordsAre"]</label>
             <select class="form-select form-select-sm" @bind="Proposal.DetectedRecordType">
                 @foreach (var rt in Enum.GetValues<RecordType>())
                 {
-                    <option value="@rt">@Describe(rt)</option>
+                    <option value="@rt">@rt.Display(L)</option>
                 }
             </select>
         </div>
         <div class="col-auto">
-            <label class="form-label">Date format</label>
-            <input class="form-control form-control-sm" placeholder="auto" @bind="Proposal.Hints.DateFormat" />
+            <label class="form-label">@L["Review_DateFormat"]</label>
+            <input class="form-control form-control-sm" placeholder="@L["Review_DateFormatAuto"]" @bind="Proposal.Hints.DateFormat" />
         </div>
         <div class="col-auto">
-            <label class="form-label">Currency</label>
+            <label class="form-label">@L["Common_Currency"]</label>
             <input class="form-control form-control-sm" style="width:6rem" @bind="Proposal.Hints.DefaultCurrency" />
         </div>
         <div class="col-auto">
             <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="comma" @bind="Proposal.Hints.DecimalComma" />
-                <label class="form-check-label" for="comma">Comma decimals (1.234,56)</label>
+                <label class="form-check-label" for="comma">@L["Review_CommaDecimals"]</label>
             </div>
         </div>
     </div>
@@ -134,13 +137,13 @@ else
         <div class="col-auto">
             <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="save" @bind="_saveProfile" />
-                <label class="form-check-label" for="save">Remember this mapping</label>
+                <label class="form-check-label" for="save">@L["Review_RememberMapping"]</label>
             </div>
         </div>
         @if (_saveProfile)
         {
             <div class="col-auto">
-                <input class="form-control form-control-sm" placeholder="Mapping name" @bind="_profileName" />
+                <input class="form-control form-control-sm" placeholder="@L["Review_MappingName"]" @bind="_profileName" />
             </div>
         }
     </div>
@@ -156,12 +159,12 @@ else
             {
                 <span class="spinner-border spinner-border-sm me-1"></span>
             }
-            Stage @table.Rows.Count rows for review
+            @L["Review_StageRows", table.Rows.Count]
         </button>
-        <a class="btn btn-outline-secondary" href="upload">Cancel</a>
+        <a class="btn btn-outline-secondary" href="upload">@L["Common_Cancel"]</a>
         @if (!CanStage)
         {
-            <span class="text-danger ms-2 small">Map at least Product name or Code, plus Quantity, to continue.</span>
+            <span class="text-danger ms-2 small">@L["Review_MapAtLeast"]</span>
         }
     </div>
 }
@@ -200,15 +203,6 @@ else
         (Field(CanonicalField.ProductName).SourceColumn is not null
         || Field(CanonicalField.Sku).SourceColumn is not null)
         && Field(CanonicalField.Quantity).SourceColumn is not null;
-
-    private static string Describe(RecordType rt) => rt switch
-    {
-        RecordType.Arrivals => "Arrivals (incoming stock)",
-        RecordType.Sales => "Sales (outgoing)",
-        RecordType.StockCount => "Stock count (absolute)",
-        RecordType.Mixed => "Mixed (per-row direction)",
-        _ => "Unknown"
-    };
 
     private async Task StageAsync()
     {

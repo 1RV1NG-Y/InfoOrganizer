@@ -1,18 +1,19 @@
 @page "/imports"
 @rendermode InteractiveServer
 @inject ImportService Importer
+@inject IStringLocalizer<AppStrings> L
 
-<PageTitle>Imports</PageTitle>
+<PageTitle>@L["Imports_Title"]</PageTitle>
 
-<h1>Imports</h1>
+<h1>@L["Imports_Title"]</h1>
 
 @if (_batches is null)
 {
-    <p>Loading...</p>
+    <p>@L["Common_Loading"]</p>
 }
 else if (_batches.Count == 0)
 {
-    <p class="text-muted">No imports yet. <a href="upload">Upload a file</a> to get started.</p>
+    <p class="text-muted">@L["Imports_NoImports"] <a href="upload">@L["Imports_UploadToStart"]</a> @L["Imports_ToGetStarted"]</p>
 }
 else
 {
@@ -20,15 +21,15 @@ else
         <table class="table table-sm table-striped align-middle">
             <thead>
                 <tr>
-                    <th>File</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th class="text-end">Rows</th>
-                    <th class="text-end">Ready</th>
-                    <th class="text-end">Needs review</th>
-                    <th class="text-end">Applied</th>
-                    <th class="text-end">Rejected</th>
-                    <th>Imported</th>
+                    <th>@L["Common_File"]</th>
+                    <th>@L["Common_Type"]</th>
+                    <th>@L["Common_Status"]</th>
+                    <th class="text-end">@L["Imports_ColRows"]</th>
+                    <th class="text-end">@L["ReviewRows_Ready"]</th>
+                    <th class="text-end">@L["ReviewRows_NeedsReview"]</th>
+                    <th class="text-end">@L["ReviewRows_Applied"]</th>
+                    <th class="text-end">@L["ReviewRows_Rejected"]</th>
+                    <th>@L["Imports_ColImported"]</th>
                     <th></th>
                 </tr>
             </thead>
@@ -37,15 +38,15 @@ else
                 {
                     <tr>
                         <td><a href="@($"/imports/{batch.BatchId}")">@batch.FileName</a></td>
-                        <td>@batch.SourceType</td>
-                        <td><span class="badge @StatusClass(batch.Status)">@batch.Status</span></td>
+                        <td>@batch.SourceType.Display(L)</td>
+                        <td><span class="badge @StatusClass(batch.Status)">@batch.Status.Display(L)</span></td>
                         <td class="text-end">@batch.RowCount</td>
                         <td class="text-end">@batch.ReadyRows</td>
                         <td class="text-end">@batch.NeedsReviewRows</td>
                         <td class="text-end">@batch.AppliedRows</td>
                         <td class="text-end">@batch.RejectedRows</td>
                         <td>@batch.ImportedAtUtc.ToLocalTime().ToString("g")</td>
-                        <td><a class="btn btn-sm btn-outline-primary" href="@($"/imports/{batch.BatchId}/review")">Open</a></td>
+                        <td><a class="btn btn-sm btn-outline-primary" href="@($"/imports/{batch.BatchId}/review")">@L["Common_Open"]</a></td>
                     </tr>
                 }
             </tbody>

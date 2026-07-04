@@ -58,6 +58,8 @@ Nothing reaches the inventory ledger without passing a validation gate:
   latest-known-cost basis. Sheets without prices import fine; no numbers are ever invented.
 - **Local-first** — one SQLite file in `%LOCALAPPDATA%\InfoOrganizer`. Your data never leaves your
   machine (the only outbound calls are the optional Anthropic API features). Backup = copy one file.
+- **Bilingual UI** — Spanish (es-MX) and English. Follows your browser language, switchable in
+  Settings; the target users are small Mexican businesses, so Spanish and MXN are the defaults.
 
 ![Inventory with valuation](docs/assets/inventory.png)
 
@@ -109,10 +111,12 @@ gating, and the ledger-safety test (rejected rows create no movements).
 
 ## Roadmap
 
-- Spanish-first UI (the target users are small Mexican businesses; MXN is already the default currency)
 - An eval harness: a corpus of deliberately messy fixtures with measured mapping accuracy and stock
   reconciliation over time
-- Auth/roles and multi-device access when real usage calls for it
+- OpenAI vision as an alternative extraction provider (the pipeline already talks to a provider
+  abstraction)
+- A hosted web edition (Docker + auth) — the codebase is already a web app; hosting it is a
+  deployment profile, not a rewrite
 
 ## License
 

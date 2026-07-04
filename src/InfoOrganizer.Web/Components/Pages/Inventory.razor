@@ -2,32 +2,33 @@
 @rendermode InteractiveServer
 @using System.Globalization
 @inject TrackingService Tracking
+@inject IStringLocalizer<AppStrings> L
 
-<PageTitle>Inventory</PageTitle>
+<PageTitle>@L["Inventory_Title"]</PageTitle>
 
-<h1>Inventory</h1>
+<h1>@L["Inventory_Title"]</h1>
 
 @if (_levels is null)
 {
-    <p>Loading...</p>
+    <p>@L["Common_Loading"]</p>
 }
 else if (_levels.Count == 0)
 {
-    <p class="text-muted">No products yet. <a href="upload">Import some records</a> to get started.</p>
+    <p class="text-muted">@L["Inventory_NoProducts"] <a href="upload">@L["Inventory_ImportSomeRecords"]</a> @L["Inventory_ToGetStarted"]</p>
 }
 else
 {
     <div class="d-flex justify-content-between align-items-center mb-2">
-        <span class="text-muted">@_levels.Count products / @_levels.Count(l => l.IsLow) low on stock</span>
+        <span class="text-muted">@L["Inventory_ProductsLowSummary", _levels.Count, _levels.Count(l => l.IsLow)]</span>
         <div class="d-flex gap-2 align-items-center">
             @if ((_locationLevels?.Count ?? 0) > 0)
             {
-                <div class="btn-group btn-group-sm" role="group" aria-label="Stock view">
-                    <button type="button" class="btn @ViewButtonClass(InventoryView.Global)" @onclick="() => _view = InventoryView.Global">Global</button>
-                    <button type="button" class="btn @ViewButtonClass(InventoryView.Location)" @onclick="() => _view = InventoryView.Location">By location</button>
+                <div class="btn-group btn-group-sm" role="group" aria-label="@L["Inventory_StockView"]">
+                    <button type="button" class="btn @ViewButtonClass(InventoryView.Global)" @onclick="() => _view = InventoryView.Global">@L["Inventory_Global"]</button>
+                    <button type="button" class="btn @ViewButtonClass(InventoryView.Location)" @onclick="() => _view = InventoryView.Location">@L["Inventory_ByLocation"]</button>
                 </div>
             }
-            <a class="btn btn-sm btn-outline-secondary" href="/export/inventory.csv" target="_blank">Export CSV</a>
+            <a class="btn btn-sm btn-outline-secondary" href="/export/inventory.csv" target="_blank">@L["Inventory_ExportCsv"]</a>
         </div>
     </div>
 
@@ -39,15 +40,15 @@ else
             <table class="table table-sm table-striped align-middle">
                 <thead>
                     <tr>
-                        <th>Product</th>
-                        <th>Code</th>
-                        <th>Category</th>
-                        <th class="text-end">On hand</th>
-                        <th>Unit</th>
-                        <th class="text-end">Unit cost</th>
-                        <th class="text-end">Value</th>
-                        <th class="text-end">Reorder at</th>
-                        <th>Status</th>
+                        <th>@L["Common_Product"]</th>
+                        <th>@L["Common_Code"]</th>
+                        <th>@L["Common_Category"]</th>
+                        <th class="text-end">@L["Inventory_OnHand"]</th>
+                        <th>@L["Common_Unit"]</th>
+                        <th class="text-end">@L["Common_UnitCost"]</th>
+                        <th class="text-end">@L["Common_Value"]</th>
+                        <th class="text-end">@L["Inventory_ReorderAt"]</th>
+                        <th>@L["Common_Status"]</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -65,11 +66,11 @@ else
                             <td>
                                 @if (l.IsLow)
                                 {
-                                    <span class="badge text-bg-warning">Low</span>
+                                    <span class="badge text-bg-warning">@L["Inventory_StatusLow"]</span>
                                 }
                                 else
                                 {
-                                    <span class="badge text-bg-success">OK</span>
+                                    <span class="badge text-bg-success">@L["Inventory_StatusOk"]</span>
                                 }
                             </td>
                         </tr>
@@ -77,7 +78,7 @@ else
                 </tbody>
                 <tfoot class="table-group-divider">
                     <tr>
-                        <th colspan="6" class="text-end">Total value</th>
+                        <th colspan="6" class="text-end">@L["Inventory_TotalValue"]</th>
                         <td class="text-end fw-semibold">
                             @if (valueTotals.Count == 0)
                             {
@@ -97,7 +98,7 @@ else
                     {
                         <tr>
                             <td colspan="9" class="text-end text-muted small">
-                                value covers @valuedProductCount of @_levels.Count products (no cost data for the rest)
+                                @L["Inventory_ValueCoverage", valuedProductCount, _levels.Count]
                             </td>
                         </tr>
                     }
@@ -107,15 +108,15 @@ else
     }
     else
     {
-        <p class="text-muted small">Location balances can be negative when outgoing records name a store without matching transfer rows; global stock is the consolidated total.</p>
+        <p class="text-muted small">@L["Inventory_LocationNote"]</p>
         <div class="table-responsive">
             <QuickGrid Items="_locationLevels!.AsQueryable()" class="table table-sm table-striped align-middle">
-                <PropertyColumn Property="@(l => l.Name)" Title="Product" Sortable="true" />
-                <PropertyColumn Property="@(l => l.Sku)" Title="Code" />
-                <PropertyColumn Property="@(l => l.LocationName)" Title="Location" Sortable="true" />
-                <PropertyColumn Property="@(l => l.Category)" Title="Category" />
-                <PropertyColumn Property="@(l => l.OnHand)" Title="On hand" Sortable="true" Align="Align.End" />
-                <PropertyColumn Property="@(l => l.Unit)" Title="Unit" />
+                <PropertyColumn Property="@(l => l.Name)" Title="@(L["Common_Product"])" Sortable="true" />
+                <PropertyColumn Property="@(l => l.Sku)" Title="@(L["Common_Code"])" />
+                <PropertyColumn Property="@(l => l.LocationName)" Title="@(L["Common_Location"])" Sortable="true" />
+                <PropertyColumn Property="@(l => l.Category)" Title="@(L["Common_Category"])" />
+                <PropertyColumn Property="@(l => l.OnHand)" Title="@(L["Inventory_OnHand"])" Sortable="true" Align="Align.End" />
+                <PropertyColumn Property="@(l => l.Unit)" Title="@(L["Common_Unit"])" />
             </QuickGrid>
         </div>
     }

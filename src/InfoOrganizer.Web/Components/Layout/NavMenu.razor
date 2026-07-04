@@ -1,41 +1,43 @@
+@inject IStringLocalizer<AppStrings> L
+
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">InfoOrganizer</a>
+        <a class="navbar-brand" href="">@L["Brand"]</a>
     </div>
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<input type="checkbox" title="@L["Nav_Menu"]" class="navbar-toggler" />
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Dashboard
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> @L["Nav_Dashboard"]
             </NavLink>
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="upload">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Import
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> @L["Nav_Import"]
             </NavLink>
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="imports">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Imports
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> @L["Nav_Imports"]
             </NavLink>
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="inventory">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Inventory
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> @L["Nav_Inventory"]
             </NavLink>
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="movements">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Movements
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> @L["Nav_Movements"]
             </NavLink>
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="settings">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Settings
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> @L["Nav_Settings"]
             </NavLink>
         </div>
     </nav>
