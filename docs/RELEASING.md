@@ -3,7 +3,7 @@
 1. Optionally bump `<Version>` in `Directory.Build.props`.
 2. Commit the version bump and any release changes.
 3. Create a version tag: `git tag v0.x.y`.
-4. Push the branch and tags: `git push && git push --tags`.
+4. Push the branch and tags: `git push; git push --tags` (PowerShell) or `git push && git push --tags` (bash).
 5. GitHub Actions runs tests on every push and pull request.
 6. Tags matching `v*` run the release workflow on `windows-latest`.
 7. The workflow strips the leading `v` and uses that version for publish and installer metadata.
