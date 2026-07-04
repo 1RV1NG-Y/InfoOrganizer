@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Anthropic" Version="12.31.0" />
+    <PackageReference Include="OpenAI" Version="2.12.0" />
   </ItemGroup>
 
   <PropertyGroup>

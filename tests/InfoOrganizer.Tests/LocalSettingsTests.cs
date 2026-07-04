@@ -24,6 +24,62 @@ public class LocalSettingsTests
     }
 
     [Fact]
+    public void OpenAI_key_round_trips_without_plaintext_on_windows()
+    {
+        using var temp = new TempDirectory();
+        const string key = "sk-openai-test-secret-1234";
+
+        new LocalSettingsService(temp.DirectoryPath).SaveOpenAiApiKey(key);
+
+        var loaded = new LocalSettingsService(temp.DirectoryPath).GetOpenAiApiKey();
+        Assert.Equal(key, loaded);
+
+        var settingsJson = File.ReadAllText(Path.Combine(temp.DirectoryPath, "settings.json"));
+        if (OperatingSystem.IsWindows())
+            Assert.False(settingsJson.Contains(key, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Anthropic_and_openai_keys_are_stored_under_separate_entries()
+    {
+        using var temp = new TempDirectory();
+        const string anthropicKey = "sk-ant-test-secret-1234";
+        const string openAiKey = "sk-openai-test-secret-1234";
+
+        var settings = new LocalSettingsService(temp.DirectoryPath);
+        settings.SaveAnthropicApiKey(anthropicKey);
+        settings.SaveOpenAiApiKey(openAiKey);
+
+        var loaded = new LocalSettingsService(temp.DirectoryPath);
+        Assert.Equal(anthropicKey, loaded.GetAnthropicApiKey());
+        Assert.Equal(openAiKey, loaded.GetOpenAiApiKey());
+
+        var settingsJson = File.ReadAllText(Path.Combine(temp.DirectoryPath, "settings.json"));
+        Assert.Contains("\"AnthropicApiKey\"", settingsJson, StringComparison.Ordinal);
+        Assert.Contains("\"OpenAiApiKey\"", settingsJson, StringComparison.Ordinal);
+        if (OperatingSystem.IsWindows())
+        {
+            Assert.False(settingsJson.Contains(anthropicKey, StringComparison.Ordinal));
+            Assert.False(settingsJson.Contains(openAiKey, StringComparison.Ordinal));
+        }
+    }
+
+    [Fact]
+    public void Ai_provider_setting_round_trips_as_plain_value()
+    {
+        using var temp = new TempDirectory();
+
+        new LocalSettingsService(temp.DirectoryPath).SaveAiProvider(AiProviderNames.OpenAI);
+
+        var loaded = new LocalSettingsService(temp.DirectoryPath).GetSavedAiProvider();
+        Assert.Equal(AiProviderNames.OpenAI, loaded);
+
+        var settingsJson = File.ReadAllText(Path.Combine(temp.DirectoryPath, "settings.json"));
+        Assert.Contains("\"AiProvider\"", settingsJson, StringComparison.Ordinal);
+        Assert.Contains("\"OpenAI\"", settingsJson, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Remove_key_makes_load_return_null()
     {
         using var temp = new TempDirectory();
@@ -49,6 +105,24 @@ public class LocalSettingsTests
         Assert.Equal("config-key", provider.GetApiKey());
 
         settings.SaveAnthropicApiKey("saved-key");
+
+        Assert.Equal("saved-key", provider.GetApiKey());
+    }
+
+    [Fact]
+    public void OpenAI_api_key_provider_prefers_saved_key_then_config()
+    {
+        using var temp = new TempDirectory();
+        var settings = new LocalSettingsService(temp.DirectoryPath);
+        var config = new TestConfiguration(new Dictionary<string, string?>
+        {
+            ["OpenAi:ApiKey"] = "config-key"
+        });
+        var provider = new OpenAiApiKeyProvider(settings, config);
+
+        Assert.Equal("config-key", provider.GetApiKey());
+
+        settings.SaveOpenAiApiKey("saved-key");
 
         Assert.Equal("saved-key", provider.GetApiKey());
     }

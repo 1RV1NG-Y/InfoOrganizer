@@ -16,11 +16,22 @@ public static class ApplicationServiceCollectionExtensions
     {
         services.AddSingleton<ILocalSettingsService>(_ => new LocalSettingsService(AppPaths.GetAppDataDirectory()));
         services.AddSingleton<IAnthropicApiKeyProvider, AnthropicApiKeyProvider>();
+        services.AddSingleton<IOpenAiApiKeyProvider, OpenAiApiKeyProvider>();
         services.AddSingleton(new AnthropicOptions
         {
             Model = config["Anthropic:Model"] ?? "claude-opus-4-8"
         });
-        services.AddSingleton<IAiClient, AnthropicAiClient>();
+        services.AddSingleton(new OpenAiOptions
+        {
+            Model = config["OpenAi:Model"] ?? "gpt-5.1"
+        });
+        services.AddSingleton<AnthropicAiClient>();
+        services.AddSingleton<OpenAiAiClient>();
+        services.AddSingleton<IAiClient>(sp => new AiProviderRouter(
+            sp.GetRequiredService<ILocalSettingsService>(),
+            config,
+            sp.GetRequiredService<AnthropicAiClient>(),
+            sp.GetRequiredService<OpenAiAiClient>()));
 
         // Ingestion adapters (resolved as a set so the import service can pick by file type).
         services.AddSingleton<ISourceAdapter, ExcelSourceAdapter>();

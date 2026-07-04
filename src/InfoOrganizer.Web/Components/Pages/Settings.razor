@@ -1,6 +1,7 @@
 @page "/settings"
 @rendermode InteractiveServer
 @using System.Globalization
+@inject Microsoft.Extensions.Configuration.IConfiguration Config
 @inject CatalogService Catalog
 @inject ILocalSettingsService LocalSettings
 @inject InfoOrganizer.Ai.IAiClient Ai
@@ -26,17 +27,25 @@ else
     <p class="small text-muted mb-2">@L["Settings_SavedKey"] <code>@_savedKeyHint</code></p>
 }
 
+<div class="mb-2" style="max-width: 320px">
+    <label class="form-label" for="ai-provider">@L["Settings_AiProvider"]</label>
+    <select id="ai-provider" class="form-select" value="@_selectedAiProvider" @onchange="ChangeAiProvider">
+        <option value="@AiProviderNames.Anthropic">@L["Settings_ProviderAnthropic"]</option>
+        <option value="@AiProviderNames.OpenAI">@L["Settings_ProviderOpenAI"]</option>
+    </select>
+</div>
+
 <div class="d-flex flex-column flex-sm-row gap-2 align-items-sm-end mb-2" style="max-width: 640px">
     <div class="flex-grow-1">
-        <label class="form-label" for="anthropic-api-key">@L["Settings_AnthropicApiKey"]</label>
-        <input id="anthropic-api-key" type="password" class="form-control" autocomplete="off"
-               placeholder="@(_hasSavedAnthropicApiKey ? L["Settings_PlaceholderReplaceKey"] : L["Settings_PlaceholderPasteKey"])"
-               @bind="_anthropicApiKeyInput" />
+        <label class="form-label" for="ai-api-key">@CurrentApiKeyLabel</label>
+        <input id="ai-api-key" type="password" class="form-control" autocomplete="off"
+               placeholder="@(_hasSavedSelectedProviderKey ? L["Settings_PlaceholderReplaceKey"] : CurrentPasteKeyPlaceholder)"
+               @bind="_apiKeyInput" />
     </div>
-    <button class="btn btn-primary" @onclick="SaveAnthropicKey">@L["Common_Save"]</button>
-    @if (_hasSavedAnthropicApiKey)
+    <button class="btn btn-primary" @onclick="SaveSelectedProviderKey">@L["Common_Save"]</button>
+    @if (_hasSavedSelectedProviderKey)
     {
-        <button class="btn btn-outline-danger" @onclick="RemoveAnthropicKey">@L["Settings_RemoveKey"]</button>
+        <button class="btn btn-outline-danger" @onclick="RemoveSelectedProviderKey">@L["Settings_RemoveKey"]</button>
     }
 </div>
 
@@ -115,10 +124,21 @@ else
     private IReadOnlyList<ProfileInfo>? _profiles;
     private Dictionary<int, decimal?> _thresholds = new();
     private int? _savedId;
-    private string? _anthropicApiKeyInput;
+    private string _selectedAiProvider = AiProviderNames.Anthropic;
+    private string? _apiKeyInput;
     private string? _savedKeyHint;
-    private bool _hasSavedAnthropicApiKey;
+    private bool _hasSavedSelectedProviderKey;
     private string? _aiSettingsMessage;
+
+    private string CurrentApiKeyLabel =>
+        _selectedAiProvider == AiProviderNames.OpenAI
+            ? L["Settings_OpenAiApiKey"]
+            : L["Settings_AnthropicApiKey"];
+
+    private string CurrentPasteKeyPlaceholder =>
+        _selectedAiProvider == AiProviderNames.OpenAI
+            ? L["Settings_PlaceholderPasteOpenAiKey"]
+            : L["Settings_PlaceholderPasteKey"];
 
     protected override async Task OnInitializedAsync() => await LoadAsync();
 
@@ -132,28 +152,61 @@ else
 
     private void LoadAiSettings()
     {
-        _hasSavedAnthropicApiKey = LocalSettings.HasSavedAnthropicApiKey();
-        _savedKeyHint = _hasSavedAnthropicApiKey ? MaskKey(LocalSettings.GetAnthropicApiKey()) : null;
+        _selectedAiProvider = AiProviderNames.NormalizeOrDefault(LocalSettings.GetSavedAiProvider() ?? Config["Ai:Provider"]);
+        LoadSelectedProviderKeyState();
     }
 
-    private void SaveAnthropicKey()
+    private void LoadSelectedProviderKeyState()
     {
-        if (string.IsNullOrWhiteSpace(_anthropicApiKeyInput))
+        _hasSavedSelectedProviderKey = HasSavedSelectedProviderKey();
+        _savedKeyHint = _hasSavedSelectedProviderKey ? MaskKey(GetSelectedProviderKey()) : null;
+    }
+
+    private void ChangeAiProvider(ChangeEventArgs args)
+    {
+        _selectedAiProvider = AiProviderNames.NormalizeOrDefault(args.Value?.ToString());
+        LocalSettings.SaveAiProvider(_selectedAiProvider);
+        _apiKeyInput = null;
+        _aiSettingsMessage = null;
+        LoadSelectedProviderKeyState();
+    }
+
+    private void SaveSelectedProviderKey()
+    {
+        if (string.IsNullOrWhiteSpace(_apiKeyInput))
             return;
 
-        LocalSettings.SaveAnthropicApiKey(_anthropicApiKeyInput);
-        _anthropicApiKeyInput = null;
+        if (_selectedAiProvider == AiProviderNames.OpenAI)
+            LocalSettings.SaveOpenAiApiKey(_apiKeyInput);
+        else
+            LocalSettings.SaveAnthropicApiKey(_apiKeyInput);
+
+        _apiKeyInput = null;
         _aiSettingsMessage = L["Settings_MsgSaved"];
-        LoadAiSettings();
+        LoadSelectedProviderKeyState();
     }
 
-    private void RemoveAnthropicKey()
+    private void RemoveSelectedProviderKey()
     {
-        LocalSettings.RemoveAnthropicApiKey();
-        _anthropicApiKeyInput = null;
+        if (_selectedAiProvider == AiProviderNames.OpenAI)
+            LocalSettings.RemoveOpenAiApiKey();
+        else
+            LocalSettings.RemoveAnthropicApiKey();
+
+        _apiKeyInput = null;
         _aiSettingsMessage = L["Settings_MsgRemoved"];
-        LoadAiSettings();
+        LoadSelectedProviderKeyState();
     }
+
+    private bool HasSavedSelectedProviderKey() =>
+        _selectedAiProvider == AiProviderNames.OpenAI
+            ? LocalSettings.HasSavedOpenAiApiKey()
+            : LocalSettings.HasSavedAnthropicApiKey();
+
+    private string? GetSelectedProviderKey() =>
+        _selectedAiProvider == AiProviderNames.OpenAI
+            ? LocalSettings.GetOpenAiApiKey()
+            : LocalSettings.GetAnthropicApiKey();
 
     private string CultureLink(string culture) =>
         $"/culture/set?culture={Uri.EscapeDataString(culture)}&redirectUri={Uri.EscapeDataString(CurrentLocalPath())}";

@@ -239,9 +239,14 @@
   <data name="Settings_AiConfigured" xml:space="preserve"><value>Configurada</value></data>
   <data name="Settings_AiNotConfigured" xml:space="preserve"><value>Sin configurar — la importación de fotos y las sugerencias de IA están deshabilitadas; la importación de hojas de cálculo funciona sin conexión.</value></data>
   <data name="Settings_SavedKey" xml:space="preserve"><value>Clave guardada:</value></data>
+  <data name="Settings_AiProvider" xml:space="preserve"><value>Proveedor de IA</value></data>
+  <data name="Settings_ProviderAnthropic" xml:space="preserve"><value>Anthropic</value></data>
+  <data name="Settings_ProviderOpenAI" xml:space="preserve"><value>OpenAI</value></data>
   <data name="Settings_AnthropicApiKey" xml:space="preserve"><value>Clave de API de Anthropic</value></data>
+  <data name="Settings_OpenAiApiKey" xml:space="preserve"><value>Clave de API de OpenAI</value></data>
   <data name="Settings_PlaceholderReplaceKey" xml:space="preserve"><value>Pega una clave nueva para reemplazar la guardada</value></data>
   <data name="Settings_PlaceholderPasteKey" xml:space="preserve"><value>Pega una clave de API de Anthropic</value></data>
+  <data name="Settings_PlaceholderPasteOpenAiKey" xml:space="preserve"><value>Pega una clave de API de OpenAI</value></data>
   <data name="Settings_RemoveKey" xml:space="preserve"><value>Quitar clave</value></data>
   <data name="Settings_MsgSaved" xml:space="preserve"><value>Guardado</value></data>
   <data name="Settings_MsgRemoved" xml:space="preserve"><value>Eliminado</value></data>

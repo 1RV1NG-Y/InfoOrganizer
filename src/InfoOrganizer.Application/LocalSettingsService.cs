@@ -51,6 +51,63 @@ public sealed class LocalSettingsService : ILocalSettingsService
         }
     }
 
+    public string? GetOpenAiApiKey()
+    {
+        lock (_gate)
+        {
+            return Unprotect(_settings.OpenAiApiKey);
+        }
+    }
+
+    public bool HasSavedOpenAiApiKey()
+    {
+        lock (_gate)
+        {
+            return !string.IsNullOrWhiteSpace(_settings.OpenAiApiKey?.Value);
+        }
+    }
+
+    public void SaveOpenAiApiKey(string apiKey)
+    {
+        if (string.IsNullOrWhiteSpace(apiKey))
+            throw new ArgumentException("API key is required.", nameof(apiKey));
+
+        lock (_gate)
+        {
+            _settings.OpenAiApiKey = Protect(apiKey.Trim());
+            WriteSettings();
+        }
+    }
+
+    public void RemoveOpenAiApiKey()
+    {
+        lock (_gate)
+        {
+            _settings.OpenAiApiKey = null;
+            WriteSettings();
+        }
+    }
+
+    public string? GetSavedAiProvider()
+    {
+        lock (_gate)
+        {
+            return AiProviderNames.IsKnown(_settings.AiProvider) ? AiProviderNames.NormalizeOrDefault(_settings.AiProvider) : null;
+        }
+    }
+
+    public void SaveAiProvider(string provider)
+    {
+        if (!AiProviderNames.IsKnown(provider))
+            throw new ArgumentException("AI provider is not supported.", nameof(provider));
+
+        lock (_gate)
+        {
+            _settings.AiProvider = AiProviderNames.NormalizeOrDefault(provider);
+            WriteSettings();
+        }
+    }
+
     public void RemoveAnthropicApiKey()
     {
         lock (_gate)
@@ -110,6 +167,8 @@ public sealed class LocalSettingsService : ILocalSettingsService
     private sealed record SettingsFile
     {
         public ProtectedSetting? AnthropicApiKey { get; set; }
+        public ProtectedSetting? OpenAiApiKey { get; set; }
+        public string? AiProvider { get; set; }
     }
 
     private sealed record ProtectedSetting(string Protection, string Value);

@@ -6,4 +6,10 @@ public interface ILocalSettingsService
     bool HasSavedAnthropicApiKey();
     void SaveAnthropicApiKey(string apiKey);
     void RemoveAnthropicApiKey();
+    string? GetOpenAiApiKey();
+    bool HasSavedOpenAiApiKey();
+    void SaveOpenAiApiKey(string apiKey);
+    void RemoveOpenAiApiKey();
+    string? GetSavedAiProvider();
+    void SaveAiProvider(string provider);
 }

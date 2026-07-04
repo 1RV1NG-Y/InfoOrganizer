@@ -239,9 +239,14 @@
   <data name="Settings_AiConfigured" xml:space="preserve"><value>Configured</value></data>
   <data name="Settings_AiNotConfigured" xml:space="preserve"><value>Not configured — photo import and AI mapping suggestions are disabled; spreadsheet import still works offline.</value></data>
   <data name="Settings_SavedKey" xml:space="preserve"><value>Saved key:</value></data>
+  <data name="Settings_AiProvider" xml:space="preserve"><value>AI provider</value></data>
+  <data name="Settings_ProviderAnthropic" xml:space="preserve"><value>Anthropic</value></data>
+  <data name="Settings_ProviderOpenAI" xml:space="preserve"><value>OpenAI</value></data>
   <data name="Settings_AnthropicApiKey" xml:space="preserve"><value>Anthropic API key</value></data>
+  <data name="Settings_OpenAiApiKey" xml:space="preserve"><value>OpenAI API key</value></data>
   <data name="Settings_PlaceholderReplaceKey" xml:space="preserve"><value>Paste a new key to replace the saved key</value></data>
   <data name="Settings_PlaceholderPasteKey" xml:space="preserve"><value>Paste an Anthropic API key</value></data>
+  <data name="Settings_PlaceholderPasteOpenAiKey" xml:space="preserve"><value>Paste an OpenAI API key</value></data>
   <data name="Settings_RemoveKey" xml:space="preserve"><value>Remove key</value></data>
   <data name="Settings_MsgSaved" xml:space="preserve"><value>Saved</value></data>
   <data name="Settings_MsgRemoved" xml:space="preserve"><value>Removed</value></data>
