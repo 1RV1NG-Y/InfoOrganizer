@@ -2,7 +2,7 @@ namespace InfoOrganizer.Evals.EvalEngine;
 
 public static class EvalGate
 {
-    public const double MappingAccuracyFloor = 0.90;
+    public const double MappingAccuracyFloor = 0.95;
 }
 
 public sealed class EvalReport

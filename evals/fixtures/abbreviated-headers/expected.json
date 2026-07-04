@@ -30,6 +30,5 @@
   "flaggedRowIndexes": [],
   "appliedRows": 4,
   "stagedRows": 4,
-  "defaultCurrency": null,
-  "knownIssue": "Abbreviated headers are not recognized reliably: \u0027Tipo Mov.\u0027 maps to Category instead of Direction, short code/date/location/price headers stay unmapped, and stock is imported as incoming only."
+  "defaultCurrency": null
 }

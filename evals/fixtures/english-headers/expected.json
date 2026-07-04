@@ -36,6 +36,5 @@
   "flaggedRowIndexes": [],
   "appliedRows": 3,
   "stagedRows": 3,
-  "defaultCurrency": "MXN",
-  "knownIssue": "The heuristic maps the English \u0027Type\u0027 column to Category instead of Direction, so the table is imported as unknown/incoming and stock is overstated."
+  "defaultCurrency": "MXN"
 }

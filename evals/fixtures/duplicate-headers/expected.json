@@ -46,6 +46,5 @@
   "flaggedRowIndexes": [],
   "appliedRows": 3,
   "stagedRows": 3,
-  "defaultCurrency": null,
-  "knownIssue": "Duplicate \u0027Cantidad\u0027 headers are not disambiguated by samples; the first text-valued column is mapped as Quantity, so all rows require review and no stock is applied."
+  "defaultCurrency": null
 }

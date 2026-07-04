@@ -152,8 +152,7 @@ public static class FixtureGenerator
                 (CanonicalField.Note, "Nota")),
             Stock = new() { Stock("BOL-01", 20m), Stock("CAJ-02", 12m) },
             StagedRows = 4,
-            AppliedRows = 4,
-            KnownIssue = "Abbreviated headers are not recognized reliably: 'Tipo Mov.' maps to Category instead of Direction, short code/date/location/price headers stay unmapped, and stock is imported as incoming only."
+            AppliedRows = 4
         });
     }
 
@@ -329,8 +328,7 @@ public static class FixtureGenerator
                 Loc("DUP-2", "Bodega", 4m)
             },
             StagedRows = 3,
-            AppliedRows = 3,
-            KnownIssue = "Duplicate 'Cantidad' headers are not disambiguated by samples; the first text-valued column is mapped as Quantity, so all rows require review and no stock is applied."
+            AppliedRows = 3
         });
     }
 
@@ -406,8 +404,7 @@ public static class FixtureGenerator
             StockByLocation = new() { Loc("ENG-1", "Backroom", 9m), Loc("ENG-1", "Store", -3m) },
             StagedRows = 3,
             AppliedRows = 3,
-            DefaultCurrency = "MXN",
-            KnownIssue = "The heuristic maps the English 'Type' column to Category instead of Direction, so the table is imported as unknown/incoming and stock is overstated."
+            DefaultCurrency = "MXN"
         });
     }
 

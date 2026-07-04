@@ -66,6 +66,5 @@
   "flaggedRowIndexes": [],
   "appliedRows": 10,
   "stagedRows": 10,
-  "defaultCurrency": "MXN",
-  "knownIssue": null
+  "defaultCurrency": "MXN"
 }

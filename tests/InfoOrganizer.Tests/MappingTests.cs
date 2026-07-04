@@ -75,6 +75,84 @@ public class HeuristicMapperTests
         Assert.Equal(RecordType.Mixed, p.DetectedRecordType);
         Assert.Equal("MXN", p.Hints.DefaultCurrency);
     }
+
+    [Fact]
+    public void Maps_abbreviated_spanish_headers()
+    {
+        var table = Tables.Make("movimientos.xlsx",
+            ("Fec.", RawCellType.Date), ("Tipo Mov.", RawCellType.Text),
+            ("Cod.", RawCellType.Text), ("Producto", RawCellType.Text),
+            ("Cant.", RawCellType.Number), ("Unid.", RawCellType.Text),
+            ("Suc.", RawCellType.Text), ("Prov.", RawCellType.Text),
+            ("P.U.", RawCellType.Currency), ("Nota", RawCellType.Text));
+
+        var p = new HeuristicMapper().Propose(table);
+
+        Assert.Equal("Fec.", Col(p, CanonicalField.Date));
+        Assert.Equal("Tipo Mov.", Col(p, CanonicalField.Direction));
+        Assert.Equal("Cod.", Col(p, CanonicalField.Sku));
+        Assert.Equal("Cant.", Col(p, CanonicalField.Quantity));
+        Assert.Equal("Unid.", Col(p, CanonicalField.Unit));
+        Assert.Equal("Suc.", Col(p, CanonicalField.Location));
+        Assert.Equal("Prov.", Col(p, CanonicalField.PartyName));
+        Assert.Equal("P.U.", Col(p, CanonicalField.UnitPrice));
+        Assert.Equal(RecordType.Mixed, p.DetectedRecordType);
+    }
+
+    [Fact]
+    public void Direction_word_samples_beat_ambiguous_type_header()
+    {
+        var table = new RawTable
+        {
+            Meta = new SourceMeta { FileName = "movements.xlsx", SourceType = SourceType.Excel },
+            Columns = new()
+            {
+                new RawColumn { Name = "Product", InferredType = RawCellType.Text },
+                new RawColumn
+                {
+                    Name = "Type",
+                    InferredType = RawCellType.Text,
+                    SampleValues = new() { "In", "Sale", "Adjustment" }
+                },
+                new RawColumn { Name = "Qty", InferredType = RawCellType.Number }
+            }
+        };
+
+        var p = new HeuristicMapper().Propose(table);
+
+        Assert.Equal("Type", Col(p, CanonicalField.Direction));
+        Assert.Null(Col(p, CanonicalField.Category));
+        Assert.Equal(RecordType.Mixed, p.DetectedRecordType);
+    }
+
+    [Fact]
+    public void Duplicate_ambiguous_headers_prefer_type_compatible_column()
+    {
+        var table = new RawTable
+        {
+            Meta = new SourceMeta { FileName = "movimientos.xlsx", SourceType = SourceType.Excel },
+            Columns = new()
+            {
+                new RawColumn { Name = "Producto", InferredType = RawCellType.Text },
+                new RawColumn
+                {
+                    Name = "Cantidad",
+                    InferredType = RawCellType.Text,
+                    SampleValues = new() { "caja", "pieza", "caja" }
+                },
+                new RawColumn
+                {
+                    Name = "Cantidad (2)",
+                    InferredType = RawCellType.Number,
+                    SampleValues = new() { "10", "3", "4" }
+                }
+            }
+        };
+
+        var p = new HeuristicMapper().Propose(table);
+
+        Assert.Equal("Cantidad (2)", Col(p, CanonicalField.Quantity));
+    }
 }
 
 public class MappingEngineTests

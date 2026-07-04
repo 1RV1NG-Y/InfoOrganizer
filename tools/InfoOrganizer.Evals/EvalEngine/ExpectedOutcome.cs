@@ -13,6 +13,8 @@ public sealed class ExpectedOutcome
     public int? AppliedRows { get; set; }
     public int? StagedRows { get; set; }
     public string? DefaultCurrency { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? KnownIssue { get; set; }
 
     public void Normalize()

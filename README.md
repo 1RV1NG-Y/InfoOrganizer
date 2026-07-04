@@ -109,6 +109,26 @@ SQLite database with a faked AI client, so the suite is offline and deterministi
 parity on the same fixture, signed-adjustment stock reconciliation, saved-profile reuse, confidence
 gating, and the ledger-safety test (rejected rows create no movements).
 
+## Eval harness
+
+The "adapts to any format" claim is measured, not asserted. `evals/fixtures/` holds a corpus of
+deliberately messy fixtures — title banners, `;`-delimited comma-decimal CSVs, abbreviated headers
+(`Cód.`, `P.U.`, `Suc.`), duplicate and English headers, adjustment vocabulary (`merma`,
+`corrección`), broken rows, BOM/quoting — each with a ground-truth answer key. The runner pushes
+every fixture through the real offline pipeline **without human confirmation** and scores the
+automatic mapping proposal:
+
+```bash
+dotnet run --project tools/InfoOrganizer.Evals -- run
+```
+
+Current corpus results: **100% mapping accuracy (192/192 field expectations), 16/16 stock
+reconciliation, 16/16 review-gate correctness.** A CI test gates every push on these numbers
+(mapping floor 95%). The harness already paid for itself: its first run caught three real mapper
+gaps (abbreviated headers, duplicate-header disambiguation, direction columns detected by sample
+values instead of header text), which were then fixed as general mechanisms — and the corpus keeps
+growing as new mess is encountered.
+
 ## Roadmap
 
 - An eval harness: a corpus of deliberately messy fixtures with measured mapping accuracy and stock
