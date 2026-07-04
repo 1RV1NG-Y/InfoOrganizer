@@ -1,0 +1,51 @@
+{
+  "recordType": "Mixed",
+  "mapping": {
+    "ProductName": "Producto",
+    "Sku": "C\u00F3digo",
+    "Category": null,
+    "Unit": null,
+    "Quantity": "Cantidad (2)",
+    "UnitPrice": null,
+    "Currency": null,
+    "Date": "Fecha",
+    "Location": "Almac\u00E9n",
+    "PartyName": null,
+    "Direction": "Tipo Movimiento",
+    "Note": "Nota"
+  },
+  "stock": [
+    {
+      "sku": "DUP-1",
+      "productName": null,
+      "expectedOnHand": 7
+    },
+    {
+      "sku": "DUP-2",
+      "productName": null,
+      "expectedOnHand": 4
+    }
+  ],
+  "stockByLocation": [
+    {
+      "product": "DUP-1",
+      "location": "Bodega",
+      "expectedOnHand": 10
+    },
+    {
+      "product": "DUP-1",
+      "location": "Tienda",
+      "expectedOnHand": -3
+    },
+    {
+      "product": "DUP-2",
+      "location": "Bodega",
+      "expectedOnHand": 4
+    }
+  ],
+  "flaggedRowIndexes": [],
+  "appliedRows": 3,
+  "stagedRows": 3,
+  "defaultCurrency": null,
+  "knownIssue": "Duplicate \u0027Cantidad\u0027 headers are not disambiguated by samples; the first text-valued column is mapped as Quantity, so all rows require review and no stock is applied."
+}

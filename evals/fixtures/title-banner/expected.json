@@ -1,0 +1,51 @@
+{
+  "recordType": "Mixed",
+  "mapping": {
+    "ProductName": "Producto",
+    "Sku": "C\u00F3digo",
+    "Category": null,
+    "Unit": "Unidad",
+    "Quantity": "Cantidad",
+    "UnitPrice": "Precio Unitario",
+    "Currency": null,
+    "Date": "Fecha",
+    "Location": "Almac\u00E9n",
+    "PartyName": "Proveedor/Cliente",
+    "Direction": "Tipo Movimiento",
+    "Note": "Nota"
+  },
+  "stock": [
+    {
+      "sku": "MIE-100",
+      "productName": null,
+      "expectedOnHand": 7
+    },
+    {
+      "sku": "CAF-250",
+      "productName": null,
+      "expectedOnHand": 8
+    }
+  ],
+  "stockByLocation": [
+    {
+      "product": "MIE-100",
+      "location": "Bodega",
+      "expectedOnHand": 10
+    },
+    {
+      "product": "MIE-100",
+      "location": "Tienda",
+      "expectedOnHand": -3
+    },
+    {
+      "product": "CAF-250",
+      "location": "Bodega",
+      "expectedOnHand": 8
+    }
+  ],
+  "flaggedRowIndexes": [],
+  "appliedRows": 4,
+  "stagedRows": 4,
+  "defaultCurrency": "MXN",
+  "knownIssue": null
+}

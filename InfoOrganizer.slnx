@@ -11,4 +11,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/InfoOrganizer.Tests/InfoOrganizer.Tests.csproj" />
   </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/InfoOrganizer.Evals/InfoOrganizer.Evals.csproj" />
+  </Folder>
 </Solution>

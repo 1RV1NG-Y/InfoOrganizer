@@ -1,0 +1,4 @@
+﻿Fecha,Tipo Movimiento,Código,Producto,Cantidad,Unidad,Almacén,Proveedor/Cliente,Precio Unitario,Nota
+2025-01-01,Entrada,SAL-ROJA,"Salsa, roja",24,frasco,Bodega,Conservas SA,18.00,"Cliente dijo ""urgente"""
+2025-01-02,Venta,SAL-ROJA,"Salsa, roja",5,frasco,Tienda,Cliente mostrador,25.00,"Venta con coma, y nota"
+2025-01-03,Entrada,CHI-001,"Chile ""arbol""",10,bolsa,Bodega,Secos del Sur,12.00,Compra

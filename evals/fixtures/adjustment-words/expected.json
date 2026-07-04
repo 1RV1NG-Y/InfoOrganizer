@@ -1,0 +1,41 @@
+{
+  "recordType": "Mixed",
+  "mapping": {
+    "ProductName": "Producto",
+    "Sku": "C\u00F3digo",
+    "Category": null,
+    "Unit": "Unidad",
+    "Quantity": "Cantidad",
+    "UnitPrice": "Precio Unitario",
+    "Currency": null,
+    "Date": "Fecha",
+    "Location": "Almac\u00E9n",
+    "PartyName": "Proveedor/Cliente",
+    "Direction": "Tipo Movimiento",
+    "Note": "Nota"
+  },
+  "stock": [
+    {
+      "sku": "DET-500",
+      "productName": null,
+      "expectedOnHand": 38
+    }
+  ],
+  "stockByLocation": [
+    {
+      "product": "DET-500",
+      "location": "Bodega",
+      "expectedOnHand": 49
+    },
+    {
+      "product": "DET-500",
+      "location": "Tienda",
+      "expectedOnHand": -11
+    }
+  ],
+  "flaggedRowIndexes": [],
+  "appliedRows": 5,
+  "stagedRows": 5,
+  "defaultCurrency": "MXN",
+  "knownIssue": null
+}

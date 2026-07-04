@@ -1,0 +1,71 @@
+{
+  "recordType": "Mixed",
+  "mapping": {
+    "ProductName": "Producto",
+    "Sku": "C\u00F3digo",
+    "Category": null,
+    "Unit": "Unidad",
+    "Quantity": "Cantidad",
+    "UnitPrice": "Precio Unitario",
+    "Currency": null,
+    "Date": "Fecha",
+    "Location": "Almac\u00E9n",
+    "PartyName": "Proveedor/Cliente",
+    "Direction": "Tipo Movimiento",
+    "Note": "Nota"
+  },
+  "stock": [
+    {
+      "sku": "CAF-250",
+      "productName": null,
+      "expectedOnHand": 22
+    },
+    {
+      "sku": "AZU-001",
+      "productName": null,
+      "expectedOnHand": 10
+    },
+    {
+      "sku": "VAS-012",
+      "productName": null,
+      "expectedOnHand": 155
+    }
+  ],
+  "stockByLocation": [
+    {
+      "product": "CAF-250",
+      "location": "Bodega",
+      "expectedOnHand": 26
+    },
+    {
+      "product": "CAF-250",
+      "location": "Tienda",
+      "expectedOnHand": -4
+    },
+    {
+      "product": "AZU-001",
+      "location": "Bodega",
+      "expectedOnHand": 15
+    },
+    {
+      "product": "AZU-001",
+      "location": "Tienda",
+      "expectedOnHand": -5
+    },
+    {
+      "product": "VAS-012",
+      "location": "Bodega",
+      "expectedOnHand": 190
+    },
+    {
+      "product": "VAS-012",
+      "location": "Tienda",
+      "expectedOnHand": -35
+    }
+  ],
+  "flaggedRowIndexes": [],
+  "appliedRows": 10,
+  "stagedRows": 10,
+  "defaultCurrency": "MXN",
+  "knownIssue": null
+}

@@ -1,0 +1,56 @@
+{
+  "recordType": "Mixed",
+  "mapping": {
+    "ProductName": "Producto",
+    "Sku": "C\u00F3digo",
+    "Category": null,
+    "Unit": "Unidad",
+    "Quantity": "Cantidad",
+    "UnitPrice": "Precio Unitario",
+    "Currency": null,
+    "Date": "Fecha",
+    "Location": "Almac\u00E9n",
+    "PartyName": "Proveedor/Cliente",
+    "Direction": "Tipo Movimiento",
+    "Note": "Nota"
+  },
+  "stock": [
+    {
+      "sku": "GAL-01",
+      "productName": null,
+      "expectedOnHand": 8
+    },
+    {
+      "sku": "JUG-01",
+      "productName": null,
+      "expectedOnHand": 4
+    }
+  ],
+  "stockByLocation": [
+    {
+      "product": "GAL-01",
+      "location": "Bodega",
+      "expectedOnHand": 10
+    },
+    {
+      "product": "GAL-01",
+      "location": "Tienda",
+      "expectedOnHand": -2
+    },
+    {
+      "product": "JUG-01",
+      "location": "Bodega",
+      "expectedOnHand": 5
+    },
+    {
+      "product": "JUG-01",
+      "location": "Tienda",
+      "expectedOnHand": -1
+    }
+  ],
+  "flaggedRowIndexes": [],
+  "appliedRows": 4,
+  "stagedRows": 4,
+  "defaultCurrency": "MXN",
+  "knownIssue": null
+}

@@ -1,0 +1,11 @@
+Fecha,Tipo Movimiento,Código,Producto,Cantidad,Unidad,Almacén,Proveedor/Cliente,Precio Unitario,Nota
+2024-01-02,Entrada,CAF-250,Cafe molido 250g,20,pza,Bodega,Tostadora Norte,68.50,Compra inicial
+2024-01-03,Entrada,AZU-001,Azucar 1kg,15,kg,Bodega,Dulces MX,22.00,Compra
+2024-01-04,Venta,CAF-250,Cafe molido 250g,4,pza,Tienda,Cliente mostrador,95.00,Venta mostrador
+2024-01-05,Salida,AZU-001,Azucar 1kg,3,kg,Tienda,Merma,0.00,Empaque roto
+2024-01-06,Ajuste(-1),CAF-250,Cafe molido 250g,-1,pza,Bodega,Inventario,0.00,Correccion
+2024-01-07,Entrada,VAS-012,Vasos 12oz,200,pza,Bodega,Plasticos Centro,1.20,Compra
+2024-01-08,Venta,VAS-012,Vasos 12oz,35,pza,Tienda,Cliente evento,2.00,Venta
+2024-01-09,Entrada,CAF-250,Cafe molido 250g,7,pza,Bodega,Tostadora Norte,67.00,Reposicion
+2024-01-10,Venta,AZU-001,Azucar 1kg,2,kg,Tienda,Cliente cafe,28.00,Venta
+2024-01-11,Ajuste(-1),VAS-012,Vasos 12oz,-10,pza,Bodega,Conteo,0.00,Danados

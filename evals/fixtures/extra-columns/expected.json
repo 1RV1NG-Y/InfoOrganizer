@@ -1,0 +1,51 @@
+{
+  "recordType": "Mixed",
+  "mapping": {
+    "ProductName": "Producto",
+    "Sku": "C\u00F3digo",
+    "Category": null,
+    "Unit": "Unidad",
+    "Quantity": "Cantidad",
+    "UnitPrice": "Precio Unitario",
+    "Currency": null,
+    "Date": "Fecha",
+    "Location": "Almac\u00E9n",
+    "PartyName": "Proveedor/Cliente",
+    "Direction": "Tipo Movimiento",
+    "Note": "Nota"
+  },
+  "stock": [
+    {
+      "sku": "EXT-1",
+      "productName": null,
+      "expectedOnHand": 28
+    },
+    {
+      "sku": "EXT-2",
+      "productName": null,
+      "expectedOnHand": 6
+    }
+  ],
+  "stockByLocation": [
+    {
+      "product": "EXT-1",
+      "location": "Bodega",
+      "expectedOnHand": 40
+    },
+    {
+      "product": "EXT-1",
+      "location": "Tienda",
+      "expectedOnHand": -12
+    },
+    {
+      "product": "EXT-2",
+      "location": "Bodega",
+      "expectedOnHand": 6
+    }
+  ],
+  "flaggedRowIndexes": [],
+  "appliedRows": 3,
+  "stagedRows": 3,
+  "defaultCurrency": "MXN",
+  "knownIssue": null
+}

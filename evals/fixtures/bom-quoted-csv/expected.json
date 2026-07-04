@@ -1,0 +1,51 @@
+{
+  "recordType": "Mixed",
+  "mapping": {
+    "ProductName": "Producto",
+    "Sku": "C\u00F3digo",
+    "Category": null,
+    "Unit": "Unidad",
+    "Quantity": "Cantidad",
+    "UnitPrice": "Precio Unitario",
+    "Currency": null,
+    "Date": "Fecha",
+    "Location": "Almac\u00E9n",
+    "PartyName": "Proveedor/Cliente",
+    "Direction": "Tipo Movimiento",
+    "Note": "Nota"
+  },
+  "stock": [
+    {
+      "sku": "SAL-ROJA",
+      "productName": null,
+      "expectedOnHand": 19
+    },
+    {
+      "sku": "CHI-001",
+      "productName": null,
+      "expectedOnHand": 10
+    }
+  ],
+  "stockByLocation": [
+    {
+      "product": "SAL-ROJA",
+      "location": "Bodega",
+      "expectedOnHand": 24
+    },
+    {
+      "product": "SAL-ROJA",
+      "location": "Tienda",
+      "expectedOnHand": -5
+    },
+    {
+      "product": "CHI-001",
+      "location": "Bodega",
+      "expectedOnHand": 10
+    }
+  ],
+  "flaggedRowIndexes": [],
+  "appliedRows": 3,
+  "stagedRows": 3,
+  "defaultCurrency": "MXN",
+  "knownIssue": null
+}

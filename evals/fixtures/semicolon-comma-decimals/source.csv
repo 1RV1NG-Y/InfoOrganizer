@@ -1,0 +1,5 @@
+Fecha;Tipo Movimiento;Código;Producto;Cantidad;Unidad;Almacén;Proveedor/Cliente;Precio Unitario;Nota
+2024-03-01;Entrada;ACE-1L;Aceite 1L;10,5;lt;Bodega;Oleicos Norte;1.234,56;Compra
+2024-03-02;Venta;ACE-1L;Aceite 1L;2,5;lt;Tienda;Cliente mostrador;1.500,00;Venta
+2024-03-03;Ajuste(-1);ACE-1L;Aceite 1L;-1,0;lt;Bodega;Conteo;0,00;Derrame
+2024-03-04;Entrada;HAR-1K;Harina 1kg;3,0;kg;Bodega;Molino Centro;25,50;Compra

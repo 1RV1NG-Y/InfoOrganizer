@@ -1,0 +1,35 @@
+{
+  "recordType": "Mixed",
+  "mapping": {
+    "ProductName": "Producto",
+    "Sku": "C\u00F3d.",
+    "Category": null,
+    "Unit": "Unid.",
+    "Quantity": "Cant.",
+    "UnitPrice": "P.U.",
+    "Currency": null,
+    "Date": "Fec.",
+    "Location": "Suc.",
+    "PartyName": "Prov.",
+    "Direction": "Tipo Mov.",
+    "Note": "Nota"
+  },
+  "stock": [
+    {
+      "sku": "BOL-01",
+      "productName": null,
+      "expectedOnHand": 20
+    },
+    {
+      "sku": "CAJ-02",
+      "productName": null,
+      "expectedOnHand": 12
+    }
+  ],
+  "stockByLocation": [],
+  "flaggedRowIndexes": [],
+  "appliedRows": 4,
+  "stagedRows": 4,
+  "defaultCurrency": null,
+  "knownIssue": "Abbreviated headers are not recognized reliably: \u0027Tipo Mov.\u0027 maps to Category instead of Direction, short code/date/location/price headers stay unmapped, and stock is imported as incoming only."
+}

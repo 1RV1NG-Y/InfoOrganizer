@@ -1,0 +1,46 @@
+{
+  "recordType": "StockCount",
+  "mapping": {
+    "ProductName": "Producto",
+    "Sku": "C\u00F3digo",
+    "Category": null,
+    "Unit": "Unidad",
+    "Quantity": "Cantidad",
+    "UnitPrice": null,
+    "Currency": null,
+    "Date": null,
+    "Location": "Almac\u00E9n",
+    "PartyName": null,
+    "Direction": null,
+    "Note": "Nota"
+  },
+  "stock": [
+    {
+      "sku": "CAF-250",
+      "productName": null,
+      "expectedOnHand": 18
+    },
+    {
+      "sku": "AZU-001",
+      "productName": null,
+      "expectedOnHand": 6
+    }
+  ],
+  "stockByLocation": [
+    {
+      "product": "CAF-250",
+      "location": "Bodega",
+      "expectedOnHand": 18
+    },
+    {
+      "product": "AZU-001",
+      "location": "Bodega",
+      "expectedOnHand": 6
+    }
+  ],
+  "flaggedRowIndexes": [],
+  "appliedRows": 2,
+  "stagedRows": 2,
+  "defaultCurrency": null,
+  "knownIssue": null
+}

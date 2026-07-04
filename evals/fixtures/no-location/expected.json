@@ -1,0 +1,30 @@
+{
+  "recordType": "Mixed",
+  "mapping": {
+    "ProductName": "Producto",
+    "Sku": "C\u00F3digo",
+    "Category": null,
+    "Unit": "Unidad",
+    "Quantity": "Cantidad",
+    "UnitPrice": "Precio Unitario",
+    "Currency": null,
+    "Date": "Fecha",
+    "Location": null,
+    "PartyName": "Proveedor/Cliente",
+    "Direction": "Tipo Movimiento",
+    "Note": "Nota"
+  },
+  "stock": [
+    {
+      "sku": "NOL-1",
+      "productName": null,
+      "expectedOnHand": 23
+    }
+  ],
+  "stockByLocation": [],
+  "flaggedRowIndexes": [],
+  "appliedRows": 2,
+  "stagedRows": 2,
+  "defaultCurrency": "MXN",
+  "knownIssue": null
+}
