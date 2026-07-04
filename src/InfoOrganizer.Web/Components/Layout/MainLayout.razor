@@ -1,0 +1,36 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <article class="content px-4">
+            @Body
+        </article>
+        <footer class="app-version px-4">InfoOrganizer v@(AppVersion)</footer>
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    private static readonly string AppVersion = GetAppVersion();
+
+    private static string GetAppVersion()
+    {
+        var version = System.Reflection.CustomAttributeExtensions
+            .GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>(typeof(MainLayout).Assembly)?
+            .InformationalVersion
+            ?? typeof(MainLayout).Assembly.GetName().Version?.ToString()
+            ?? "0.1.0";
+
+        var suffixStart = version.IndexOf('+');
+        return suffixStart >= 0 ? version[..suffixStart] : version;
+    }
+}

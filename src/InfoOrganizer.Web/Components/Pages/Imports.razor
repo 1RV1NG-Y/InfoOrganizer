@@ -1,0 +1,69 @@
+@page "/imports"
+@rendermode InteractiveServer
+@inject ImportService Importer
+
+<PageTitle>Imports</PageTitle>
+
+<h1>Imports</h1>
+
+@if (_batches is null)
+{
+    <p>Loading...</p>
+}
+else if (_batches.Count == 0)
+{
+    <p class="text-muted">No imports yet. <a href="upload">Upload a file</a> to get started.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th class="text-end">Rows</th>
+                    <th class="text-end">Ready</th>
+                    <th class="text-end">Needs review</th>
+                    <th class="text-end">Applied</th>
+                    <th class="text-end">Rejected</th>
+                    <th>Imported</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var batch in _batches)
+                {
+                    <tr>
+                        <td><a href="@($"/imports/{batch.BatchId}")">@batch.FileName</a></td>
+                        <td>@batch.SourceType</td>
+                        <td><span class="badge @StatusClass(batch.Status)">@batch.Status</span></td>
+                        <td class="text-end">@batch.RowCount</td>
+                        <td class="text-end">@batch.ReadyRows</td>
+                        <td class="text-end">@batch.NeedsReviewRows</td>
+                        <td class="text-end">@batch.AppliedRows</td>
+                        <td class="text-end">@batch.RejectedRows</td>
+                        <td>@batch.ImportedAtUtc.ToLocalTime().ToString("g")</td>
+                        <td><a class="btn btn-sm btn-outline-primary" href="@($"/imports/{batch.BatchId}/review")">Open</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private IReadOnlyList<ImportBatchListItem>? _batches;
+
+    protected override async Task OnInitializedAsync()
+        => _batches = await Importer.GetImportBatchesAsync();
+
+    private static string StatusClass(ImportStatus status) => status switch
+    {
+        ImportStatus.Imported => "text-bg-success",
+        ImportStatus.AwaitingReview => "text-bg-warning",
+        ImportStatus.Failed => "text-bg-danger",
+        _ => "text-bg-secondary"
+    };
+}

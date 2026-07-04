@@ -1,0 +1,56 @@
+@page "/movements"
+@rendermode InteractiveServer
+@inject TrackingService Tracking
+
+<PageTitle>Movements</PageTitle>
+
+<h1>Movements</h1>
+
+@if (_movements is null)
+{
+    <p>Loading…</p>
+}
+else if (_movements.Count == 0)
+{
+    <p class="text-muted">No movements yet. <a href="upload">Import some records</a> to get started.</p>
+}
+else
+{
+    <p class="text-muted">Most recent @_movements.Count movements</p>
+    <div class="table-responsive">
+        <QuickGrid Items="_movements.AsQueryable()" class="table table-sm table-striped align-middle">
+            <PropertyColumn Property="@(m => m.OccurredOn)" Title="Date" Sortable="true" />
+            <PropertyColumn Property="@(m => m.Product!.Name)" Title="Product" Sortable="true" />
+            <PropertyColumn Property="@(m => m.LocationName)" Title="Location" Sortable="true" />
+            <TemplateColumn Title="Type">
+                <span class="badge @KindClass(context.Kind)">@context.Kind</span>
+            </TemplateColumn>
+            <PropertyColumn Property="@(m => m.Quantity)" Title="Qty" Align="Align.End" />
+            <PropertyColumn Property="@(m => m.UnitPrice)" Title="Unit price" Align="Align.End" />
+            <TemplateColumn Title="Value" Align="Align.End">@LineValue(context)</TemplateColumn>
+            <PropertyColumn Property="@(m => m.Currency)" Title="Cur" />
+            <PropertyColumn Property="@(m => m.PartyName)" Title="Party" />
+            <TemplateColumn Title="Source">
+                <a href="@($"/imports/{context.ImportBatchId}")">@(context.ImportBatch?.FileName ?? "source")</a>
+            </TemplateColumn>
+            <PropertyColumn Property="@(m => m.Note)" Title="Note" />
+        </QuickGrid>
+    </div>
+}
+
+@code {
+    private IReadOnlyList<StockMovement>? _movements;
+
+    protected override async Task OnInitializedAsync()
+        => _movements = await Tracking.GetRecentMovementsAsync();
+
+    private static string KindClass(MovementKind kind) => kind switch
+    {
+        MovementKind.In => "text-bg-success",
+        MovementKind.Out => "text-bg-danger",
+        _ => "text-bg-secondary"
+    };
+
+    private static string LineValue(StockMovement movement) =>
+        movement.UnitPrice is { } price ? (movement.Quantity * price).ToString("0.##") : "";
+}

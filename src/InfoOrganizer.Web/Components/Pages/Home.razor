@@ -1,0 +1,215 @@
+@page "/"
+@rendermode InteractiveServer
+@using System.Globalization
+@inject TrackingService Tracking
+@inject SeedService Seeder
+
+<PageTitle>Dashboard</PageTitle>
+
+<div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-4">
+    <h1 class="mb-0">Dashboard</h1>
+    <div class="btn-group btn-group-sm" role="group" aria-label="Summary period">
+        <button type="button" class="btn @PeriodButtonClass(SummaryPeriod.AllTime)" @onclick="() => SetPeriodAsync(SummaryPeriod.AllTime)">All time</button>
+        <button type="button" class="btn @PeriodButtonClass(SummaryPeriod.ThisWeek)" @onclick="() => SetPeriodAsync(SummaryPeriod.ThisWeek)">This week</button>
+        <button type="button" class="btn @PeriodButtonClass(SummaryPeriod.ThisMonth)" @onclick="() => SetPeriodAsync(SummaryPeriod.ThisMonth)">This month</button>
+    </div>
+</div>
+
+@if (_summary is null)
+{
+    <p>Loading…</p>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card text-bg-light"><div class="card-body">
+                <div class="text-muted small">Products</div>
+                <div class="fs-3">@_summary.ProductCount</div>
+            </div></div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card @(_summary.LowStockCount > 0 ? "text-bg-warning" : "text-bg-light")"><div class="card-body">
+                <div class="small">Low stock</div>
+                <div class="fs-3">@_summary.LowStockCount</div>
+            </div></div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card text-bg-light"><div class="card-body">
+                <div class="text-muted small">Total received</div>
+                <div class="fs-3">@_summary.TotalIn</div>
+            </div></div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card text-bg-light"><div class="card-body">
+                <div class="text-muted small">Total sold / out</div>
+                <div class="fs-3">@_summary.TotalOut</div>
+            </div></div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card text-bg-light"><div class="card-body">
+                <div class="text-muted small">Purchases (value)</div>
+                <div class="fs-3">
+                    @if (_summary.PurchaseValuesByCurrency.Count == 0)
+                    {
+                        <span>&mdash;</span>
+                    }
+                    else
+                    {
+                        @foreach (var value in _summary.PurchaseValuesByCurrency)
+                        {
+                            <div>@FormatMoney(value.Value, value.Currency)</div>
+                        }
+                    }
+                </div>
+                @{
+                    var purchaseCoverage = CoverageNote(_summary.PricedInCount, _summary.InCount);
+                }
+                @if (!string.IsNullOrEmpty(purchaseCoverage))
+                {
+                    <div class="text-muted small mt-1">@purchaseCoverage</div>
+                }
+            </div></div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card text-bg-light"><div class="card-body">
+                <div class="text-muted small">Sales (value)</div>
+                <div class="fs-3">
+                    @if (_summary.SalesValuesByCurrency.Count == 0)
+                    {
+                        <span>&mdash;</span>
+                    }
+                    else
+                    {
+                        @foreach (var value in _summary.SalesValuesByCurrency)
+                        {
+                            <div>@FormatMoney(value.Value, value.Currency)</div>
+                        }
+                    }
+                </div>
+                @{
+                    var salesCoverage = CoverageNote(_summary.PricedOutCount, _summary.OutCount);
+                }
+                @if (!string.IsNullOrEmpty(salesCoverage))
+                {
+                    <div class="text-muted small mt-1">@salesCoverage</div>
+                }
+            </div></div>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <a class="btn btn-primary" href="upload">Import a file or photo</a>
+        <a class="btn btn-outline-secondary" href="inventory">View inventory</a>
+    </div>
+
+    @if (_low.Count > 0)
+    {
+        <h2 class="h5">Low stock</h2>
+        <ul class="list-group">
+            @foreach (var l in _low)
+            {
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>@l.Name</span>
+                    <span class="badge text-bg-warning">@l.OnHand @l.Unit</span>
+                </li>
+            }
+        </ul>
+    }
+    else if (_summary.ProductCount == 0)
+    {
+        <p class="text-muted">No data yet. Import a spreadsheet or a photo of a paper record — or load a sample to look around.</p>
+        <button class="btn btn-outline-primary" @onclick="LoadSampleAsync" disabled="@_seeding">
+            @if (_seeding)
+            {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            Load sample data
+        </button>
+    }
+}
+
+@code {
+    private TrackingSummary? _summary;
+    private IReadOnlyList<StockLevel> _low = Array.Empty<StockLevel>();
+    private SummaryPeriod _period = SummaryPeriod.AllTime;
+    private bool _seeding;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        var range = PeriodRange(_period);
+        _summary = await Tracking.GetSummaryAsync(range.From, range.To);
+        _low = await Tracking.GetLowStockAsync();
+    }
+
+    private async Task SetPeriodAsync(SummaryPeriod period)
+    {
+        if (_period == period)
+            return;
+
+        _period = period;
+        await LoadAsync();
+    }
+
+    private async Task LoadSampleAsync()
+    {
+        _seeding = true;
+        try
+        {
+            await Seeder.SeedSampleAsync();
+            await LoadAsync();
+        }
+        finally
+        {
+            _seeding = false;
+        }
+    }
+
+    private string PeriodButtonClass(SummaryPeriod period) =>
+        _period == period ? "btn-primary" : "btn-outline-secondary";
+
+    private static (DateOnly? From, DateOnly? To) PeriodRange(SummaryPeriod period)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        return period switch
+        {
+            SummaryPeriod.ThisWeek => ThisWeek(today),
+            SummaryPeriod.ThisMonth => ThisMonth(today),
+            _ => (null, null)
+        };
+    }
+
+    private static (DateOnly From, DateOnly To) ThisWeek(DateOnly today)
+    {
+        var daysSinceMonday = ((int)today.DayOfWeek + 6) % 7;
+        var from = today.AddDays(-daysSinceMonday);
+        return (from, from.AddDays(6));
+    }
+
+    private static (DateOnly From, DateOnly To) ThisMonth(DateOnly today)
+    {
+        var from = new DateOnly(today.Year, today.Month, 1);
+        return (from, from.AddMonths(1).AddDays(-1));
+    }
+
+    private static string FormatMoney(decimal value, string currency) =>
+        $"{value.ToString("C", CultureInfo.CurrentCulture)} {currency}";
+
+    private static string CoverageNote(int pricedCount, int totalCount)
+    {
+        if (totalCount == 0 || pricedCount == totalCount)
+            return "";
+        return pricedCount == 0
+            ? "no cost data"
+            : $"based on {pricedCount} of {totalCount} movements with price data";
+    }
+
+    private enum SummaryPeriod
+    {
+        AllTime,
+        ThisWeek,
+        ThisMonth
+    }
+}

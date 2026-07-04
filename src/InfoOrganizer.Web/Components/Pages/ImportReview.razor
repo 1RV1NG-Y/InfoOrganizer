@@ -1,0 +1,557 @@
+@page "/imports/{BatchId:int}/review"
+@rendermode InteractiveServer
+@using System.Text.Json
+@inject ImportService Importer
+
+<PageTitle>Review rows</PageTitle>
+
+@if (_batch is null)
+{
+    <h1>Review rows</h1>
+    @if (_missing)
+    {
+        <p class="text-muted">Import batch not found.</p>
+    }
+    else
+    {
+        <p>Loading...</p>
+    }
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+            <h1>Review rows</h1>
+            <p class="text-muted mb-0">@_batch.FileName / @_batch.RowCount rows / @_batch.SourceType</p>
+            <p class="mb-0"><a href="@($"/imports/{BatchId}")">Batch detail</a></p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" disabled="@(!HasReadyRows || _applying)" @onclick="RequestApplyAsync">
+                @if (_applying)
+                {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                Apply ready rows
+            </button>
+            <a class="btn btn-outline-secondary" href="upload">Import another</a>
+        </div>
+    </div>
+
+    <div class="row g-2 mb-3">
+        <div class="col-sm-6 col-lg-3">
+            <button type="button" class="@SummaryCardClass(ReviewRowStatus.Ready)" aria-pressed="@(_statusFilter == ReviewRowStatus.Ready)" @onclick="() => ToggleStatusFilter(ReviewRowStatus.Ready)">
+                <div class="text-muted small">Ready</div>
+                <div class="fs-4">@Count(ReviewRowStatus.Ready)</div>
+            </button>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <button type="button" class="@SummaryCardClass(ReviewRowStatus.NeedsReview)" aria-pressed="@(_statusFilter == ReviewRowStatus.NeedsReview)" @onclick="() => ToggleStatusFilter(ReviewRowStatus.NeedsReview)">
+                <div class="text-muted small">Needs review</div>
+                <div class="fs-4">@Count(ReviewRowStatus.NeedsReview)</div>
+            </button>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <button type="button" class="@SummaryCardClass(ReviewRowStatus.Applied)" aria-pressed="@(_statusFilter == ReviewRowStatus.Applied)" @onclick="() => ToggleStatusFilter(ReviewRowStatus.Applied)">
+                <div class="text-muted small">Applied</div>
+                <div class="fs-4">@Count(ReviewRowStatus.Applied)</div>
+            </button>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <button type="button" class="@SummaryCardClass(ReviewRowStatus.Rejected)" aria-pressed="@(_statusFilter == ReviewRowStatus.Rejected)" @onclick="() => ToggleStatusFilter(ReviewRowStatus.Rejected)">
+                <div class="text-muted small">Rejected</div>
+                <div class="fs-4">@Count(ReviewRowStatus.Rejected)</div>
+            </button>
+        </div>
+    </div>
+
+    @if (_confirmingApply)
+    {
+        <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>@NeedsReviewRows rows are not ready and will NOT be applied. Apply the @ReadyRows ready rows?</div>
+            <div class="btn-group btn-group-sm">
+                <button class="btn btn-warning" disabled="@_applying" @onclick="ConfirmApplyReadyAsync">Confirm</button>
+                <button class="btn btn-outline-secondary" disabled="@_applying" @onclick="CancelApplyConfirmation">Cancel</button>
+            </div>
+        </div>
+    }
+    @if (_message is not null)
+    {
+        <div class="alert @_messageClass">@_message</div>
+    }
+    @if (_error is not null)
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-success" disabled="@(!HasSelection || _bulkWorking)" @onclick="ApproveSelectedAsync">Approve selected</button>
+            <button class="btn btn-outline-danger" disabled="@(!HasSelection || _bulkWorking)" @onclick="RejectSelectedAsync">Reject selected</button>
+        </div>
+        @if (_statusFilter is not null)
+        {
+            <div class="text-muted small">Showing @VisibleRows.Count of @_batch.Rows.Count rows</div>
+        }
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>
+                        <input class="form-check-input" type="checkbox" checked="@AllVisibleSelectableSelected" disabled="@(!HasVisibleSelectableRows)" aria-label="Select all visible rows" @onchange="ToggleSelectVisible" />
+                    </th>
+                    <th>Row</th>
+                    <th>Status</th>
+                    <th>Confidence</th>
+                    <th>Issues</th>
+                    <th>Product</th>
+                    <th>Code</th>
+                    <th>Type</th>
+                    <th class="text-end">Qty</th>
+                    <th>Location</th>
+                    <th class="text-end">Unit price</th>
+                    <th>Cur</th>
+                    <th>Date</th>
+                    <th>Party</th>
+                    <th>Note</th>
+                    <th>Source</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var detail in VisibleRows)
+                {
+                    var row = detail.Row;
+                    var edit = _edits[row.Id];
+                    var locked = row.Status == ReviewRowStatus.Applied;
+                    <tr>
+                        <td>
+                            <input class="form-check-input" type="checkbox" checked="@_selectedRowIds.Contains(row.Id)" disabled="@locked" aria-label="@($"Select row {row.RowIndex + 1}")" @onchange="e => ToggleSelected(row.Id, e.Value)" />
+                        </td>
+                        <td>@(row.RowIndex + 1)</td>
+                        <td><span class="badge @StatusClass(row.Status)">@row.Status</span></td>
+                        <td>@($"{row.Confidence:P0}")</td>
+                        <td style="min-width: 12rem">
+                            @foreach (var issue in Issues(row))
+                            {
+                                <div class="small text-danger">@issue</div>
+                            }
+                        </td>
+                        <td><input class="form-control form-control-sm" style="width: 12rem" @bind="edit.ProductName" disabled="@locked" /></td>
+                        <td><input class="form-control form-control-sm" style="width: 8rem" @bind="edit.Sku" disabled="@locked" /></td>
+                        <td>
+                            <select class="form-select form-select-sm" style="width: 8rem" @bind="edit.Kind" disabled="@locked">
+                                @foreach (var kind in Enum.GetValues<MovementKind>())
+                                {
+                                    <option value="@kind">@kind</option>
+                                }
+                            </select>
+                        </td>
+                        <td><input type="number" step="any" class="form-control form-control-sm text-end" style="width: 7rem" @bind="edit.Quantity" disabled="@locked" /></td>
+                        <td><input class="form-control form-control-sm" style="width: 8rem" @bind="edit.LocationName" disabled="@locked" /></td>
+                        <td><input type="number" step="any" class="form-control form-control-sm text-end" style="width: 7rem" @bind="edit.UnitPrice" disabled="@locked" /></td>
+                        <td><input class="form-control form-control-sm" style="width: 5rem" @bind="edit.Currency" disabled="@locked" /></td>
+                        <td><input type="date" class="form-control form-control-sm" style="width: 9rem" value="@FormatDate(edit.OccurredOn)" @onchange="e => SetDate(edit, e.Value?.ToString())" disabled="@locked" /></td>
+                        <td><input class="form-control form-control-sm" style="width: 10rem" @bind="edit.PartyName" disabled="@locked" /></td>
+                        <td><input class="form-control form-control-sm" style="width: 12rem" @bind="edit.Note" disabled="@locked" /></td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => ToggleSource(row.Id)">
+                                @(IsSourceExpanded(row.Id) ? "Hide source" : "Source")
+                            </button>
+                        </td>
+                        <td>
+                            @if (!locked)
+                            {
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-secondary" @onclick="() => SaveRowAsync(row.Id)">Save</button>
+                                    <button class="btn btn-outline-success" @onclick="() => ApproveRowAsync(row.Id)">Approve</button>
+                                    <button class="btn btn-outline-danger" @onclick="() => RejectRowAsync(row.Id)">Reject</button>
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                    @if (IsSourceExpanded(row.Id))
+                    {
+                        <tr>
+                            <td colspan="17" class="bg-white">
+                                <div class="row g-3 p-2">
+                                    <div class="col-lg-8">
+                                        <div class="small fw-semibold mb-1">Original source cells</div>
+                                        @{
+                                            var cells = SourceCells(detail.RawDataJson);
+                                        }
+                                        @if (cells.Count == 0)
+                                        {
+                                            <p class="text-muted small mb-0">No source cells.</p>
+                                        }
+                                        else
+                                        {
+                                            <table class="table table-sm table-bordered mb-0">
+                                                <tbody>
+                                                    @foreach (var cell in cells)
+                                                    {
+                                                        <tr>
+                                                            <th class="text-muted" style="width: 12rem">@cell.Key</th>
+                                                            <td>@cell.Value</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        }
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="small fw-semibold mb-1">Parse issues</div>
+                                        @{
+                                            var issues = Issues(row);
+                                        }
+                                        @if (issues.Count == 0)
+                                        {
+                                            <p class="text-muted small mb-0">No issues.</p>
+                                        }
+                                        else
+                                        {
+                                            <ul class="small text-danger mb-0">
+                                                @foreach (var issue in issues)
+                                                {
+                                                    <li>@issue</li>
+                                                }
+                                            </ul>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter] public int BatchId { get; set; }
+
+    private ReviewBatchDetails? _batch;
+    private readonly Dictionary<int, ReviewRowEdit> _edits = new();
+    private readonly HashSet<int> _selectedRowIds = new();
+    private readonly HashSet<int> _expandedSourceRows = new();
+    private ReviewRowStatus? _statusFilter;
+    private bool _missing;
+    private bool _applying;
+    private bool _bulkWorking;
+    private bool _confirmingApply;
+    private string? _message;
+    private string _messageClass = "alert-success";
+    private string? _error;
+
+    private IReadOnlyList<ReviewRowDetails> VisibleRows =>
+        _batch is null
+            ? Array.Empty<ReviewRowDetails>()
+            : _statusFilter is null
+                ? _batch.Rows
+                : _batch.Rows.Where(r => r.Row.Status == _statusFilter).ToList();
+
+    private bool HasReadyRows => _batch?.Rows.Any(r => r.Row.Status == ReviewRowStatus.Ready) == true;
+    private int ReadyRows => Count(ReviewRowStatus.Ready);
+    private int NeedsReviewRows => Count(ReviewRowStatus.NeedsReview);
+    private bool HasSelection => _selectedRowIds.Count > 0;
+    private bool HasVisibleSelectableRows => VisibleRows.Any(r => r.Row.Status != ReviewRowStatus.Applied);
+
+    private bool AllVisibleSelectableSelected
+    {
+        get
+        {
+            var selectable = VisibleRows.Where(r => r.Row.Status != ReviewRowStatus.Applied).ToList();
+            return selectable.Count > 0 && selectable.All(r => _selectedRowIds.Contains(r.Row.Id));
+        }
+    }
+
+    protected override async Task OnParametersSetAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _batch = await Importer.GetReviewBatchAsync(BatchId);
+        _missing = _batch is null;
+        _edits.Clear();
+
+        if (_batch is null)
+        {
+            _selectedRowIds.Clear();
+            _expandedSourceRows.Clear();
+            return;
+        }
+
+        foreach (var detail in _batch.Rows)
+            _edits[detail.Row.Id] = ToEdit(detail.Row);
+
+        PruneSelection();
+    }
+
+    private async Task SaveRowAsync(int rowId)
+    {
+        await SaveWithStatusAsync(rowId, _edits[rowId].Status);
+    }
+
+    private async Task ApproveRowAsync(int rowId)
+    {
+        await SaveWithStatusAsync(rowId, ReviewRowStatus.Ready);
+    }
+
+    private async Task SaveWithStatusAsync(int rowId, ReviewRowStatus status)
+    {
+        _error = null;
+        _message = null;
+        _confirmingApply = false;
+        try
+        {
+            var edit = _edits[rowId];
+            edit.Status = status;
+            await Importer.UpdateReviewRowAsync(edit);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task RejectRowAsync(int rowId)
+    {
+        _error = null;
+        _message = null;
+        _confirmingApply = false;
+        try
+        {
+            await Importer.RejectReviewRowAsync(rowId);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task ApproveSelectedAsync()
+    {
+        await RunBulkActionAsync(async ids =>
+        {
+            var result = await Importer.ApproveReviewRowsAsync(ids);
+            _messageClass = result.FailedRows > 0 ? "alert-warning" : "alert-success";
+            _message = ApprovalSummary(result);
+        });
+    }
+
+    private async Task RejectSelectedAsync()
+    {
+        await RunBulkActionAsync(async ids =>
+        {
+            var result = await Importer.RejectReviewRowsAsync(ids);
+            _messageClass = "alert-success";
+            _message = RejectSummary(result);
+        });
+    }
+
+    private async Task RunBulkActionAsync(Func<int[], Task> action)
+    {
+        var ids = _selectedRowIds.ToArray();
+        if (ids.Length == 0) return;
+
+        _bulkWorking = true;
+        _error = null;
+        _message = null;
+        _confirmingApply = false;
+        try
+        {
+            await action(ids);
+            _selectedRowIds.Clear();
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _bulkWorking = false;
+        }
+    }
+
+    private async Task RequestApplyAsync()
+    {
+        _error = null;
+        _message = null;
+
+        if (NeedsReviewRows > 0)
+        {
+            _confirmingApply = true;
+            return;
+        }
+
+        await ConfirmApplyReadyAsync();
+    }
+
+    private async Task ConfirmApplyReadyAsync()
+    {
+        _applying = true;
+        _error = null;
+        _message = null;
+        try
+        {
+            var result = await Importer.ApplyReadyRowsAsync(BatchId);
+            _messageClass = "alert-success";
+            _message = $"Applied {result.ImportedRows} rows.";
+            _confirmingApply = false;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _applying = false;
+        }
+    }
+
+    private void CancelApplyConfirmation()
+    {
+        _confirmingApply = false;
+    }
+
+    private void ToggleStatusFilter(ReviewRowStatus status)
+    {
+        _statusFilter = _statusFilter == status ? null : status;
+        _selectedRowIds.Clear();
+        _confirmingApply = false;
+    }
+
+    private void ToggleSelectVisible(ChangeEventArgs e)
+    {
+        var selectable = VisibleRows.Where(r => r.Row.Status != ReviewRowStatus.Applied).Select(r => r.Row.Id).ToList();
+        if (IsChecked(e.Value))
+        {
+            foreach (var id in selectable)
+                _selectedRowIds.Add(id);
+        }
+        else
+        {
+            foreach (var id in selectable)
+                _selectedRowIds.Remove(id);
+        }
+    }
+
+    private void ToggleSelected(int rowId, object? value)
+    {
+        if (IsChecked(value))
+            _selectedRowIds.Add(rowId);
+        else
+            _selectedRowIds.Remove(rowId);
+    }
+
+    private void ToggleSource(int rowId)
+    {
+        if (!_expandedSourceRows.Add(rowId))
+            _expandedSourceRows.Remove(rowId);
+    }
+
+    private bool IsSourceExpanded(int rowId) => _expandedSourceRows.Contains(rowId);
+
+    private void PruneSelection()
+    {
+        if (_batch is null)
+        {
+            _selectedRowIds.Clear();
+            return;
+        }
+
+        var selectable = _batch.Rows
+            .Where(r => r.Row.Status != ReviewRowStatus.Applied)
+            .Select(r => r.Row.Id)
+            .ToHashSet();
+        _selectedRowIds.RemoveWhere(id => !selectable.Contains(id));
+    }
+
+    private int Count(ReviewRowStatus status) => _batch?.Rows.Count(r => r.Row.Status == status) ?? 0;
+
+    private static ReviewRowEdit ToEdit(ReviewRow row) => new()
+    {
+        Id = row.Id,
+        Status = row.Status,
+        ProductName = row.ProductName,
+        Sku = row.Sku,
+        Category = row.Category,
+        Unit = row.Unit,
+        Kind = row.Kind,
+        Quantity = row.Quantity,
+        UnitPrice = row.UnitPrice,
+        Currency = row.Currency,
+        OccurredOn = row.OccurredOn,
+        LocationName = row.LocationName,
+        PartyName = row.PartyName,
+        Note = row.Note
+    };
+
+    private static IReadOnlyList<string> Issues(ReviewRow row)
+    {
+        if (string.IsNullOrWhiteSpace(row.IssuesJson))
+            return Array.Empty<string>();
+
+        return JsonSerializer.Deserialize<List<string>>(row.IssuesJson) ?? new List<string>();
+    }
+
+    private static IReadOnlyList<KeyValuePair<string, string?>> SourceCells(string rawJson)
+    {
+        if (string.IsNullOrWhiteSpace(rawJson))
+            return Array.Empty<KeyValuePair<string, string?>>();
+
+        try
+        {
+            return JsonSerializer.Deserialize<Dictionary<string, string?>>(rawJson)?.ToList()
+                ?? new List<KeyValuePair<string, string?>>();
+        }
+        catch (JsonException)
+        {
+            return Array.Empty<KeyValuePair<string, string?>>();
+        }
+    }
+
+    private string SummaryCardClass(ReviewRowStatus status) =>
+        "btn text-start w-100 h-100 border " +
+        (_statusFilter == status ? "border-primary bg-primary-subtle" : "bg-white");
+
+    private static string StatusClass(ReviewRowStatus status) => status switch
+    {
+        ReviewRowStatus.Ready => "text-bg-success",
+        ReviewRowStatus.Applied => "text-bg-primary",
+        ReviewRowStatus.Rejected => "text-bg-secondary",
+        _ => "text-bg-warning"
+    };
+
+    private static string FormatDate(DateOnly? date) => date?.ToString("yyyy-MM-dd") ?? "";
+
+    private static void SetDate(ReviewRowEdit edit, string? value)
+    {
+        edit.OccurredOn = DateOnly.TryParse(value, out var date) ? date : null;
+    }
+
+    private static bool IsChecked(object? value) => value is bool checkedValue && checkedValue;
+
+    private static string ApprovalSummary(ReviewRowsActionResult result)
+    {
+        var parts = new List<string> { $"{result.ApprovedRows} approved" };
+        if (result.FailedRows > 0)
+            parts.Add($"{result.FailedRows} could not be approved (validation failed)");
+        if (result.SkippedRows > 0)
+            parts.Add($"{result.SkippedRows} skipped");
+        return string.Join(", ", parts) + ".";
+    }
+
+    private static string RejectSummary(ReviewRowsActionResult result)
+    {
+        var parts = new List<string> { $"{result.RejectedRows} rejected" };
+        if (result.SkippedRows > 0)
+            parts.Add($"{result.SkippedRows} skipped");
+        return string.Join(", ", parts) + ".";
+    }
+}

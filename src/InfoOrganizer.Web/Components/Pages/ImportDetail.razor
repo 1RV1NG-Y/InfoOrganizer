@@ -1,0 +1,316 @@
+@page "/imports/{BatchId:int}"
+@rendermode InteractiveServer
+@using System.Text.Json
+@inject ImportService Importer
+
+<PageTitle>Import detail</PageTitle>
+
+@if (_details is null)
+{
+    <h1>Import detail</h1>
+    @if (_missing)
+    {
+        <p class="text-muted">Import batch not found.</p>
+    }
+    else
+    {
+        <p>Loading...</p>
+    }
+}
+else
+{
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+        <div>
+            <h1 class="mb-1">@_details.FileName</h1>
+            <div class="d-flex flex-wrap align-items-center gap-2 text-muted">
+                <span class="badge text-bg-light border">@_details.SourceType</span>
+                <span class="badge @BatchStatusClass(_details.Status)">@_details.Status</span>
+                <span>@_details.ImportedAtUtc.ToLocalTime().ToString("g")</span>
+            </div>
+        </div>
+        <a class="btn btn-primary" href="@($"/imports/{BatchId}/review")">Open review</a>
+    </div>
+
+    <div class="row g-2 mb-4">
+        <div class="col-sm-6 col-lg-2">
+            <div class="border rounded p-2 h-100">
+                <div class="text-muted small">Total rows</div>
+                <div class="fs-5">@_details.RowCount</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-2">
+            <div class="border rounded p-2 h-100">
+                <div class="text-muted small">Ready</div>
+                <div class="fs-5">@_details.ReadyRows</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-2">
+            <div class="border rounded p-2 h-100">
+                <div class="text-muted small">Needs review</div>
+                <div class="fs-5">@_details.NeedsReviewRows</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-2">
+            <div class="border rounded p-2 h-100">
+                <div class="text-muted small">Applied</div>
+                <div class="fs-5">@_details.AppliedRows</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-2">
+            <div class="border rounded p-2 h-100">
+                <div class="text-muted small">Rejected</div>
+                <div class="fs-5">@_details.RejectedRows</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-2">
+            <div class="border rounded p-2 h-100">
+                <div class="text-muted small">Source profile</div>
+                @if (string.IsNullOrWhiteSpace(_details.SourceProfileName))
+                {
+                    <div>none</div>
+                }
+                else
+                {
+                    <div>@_details.SourceProfileName</div>
+                    <code class="small">@TruncateFingerprint(_details.SourceProfileFingerprint)</code>
+                }
+            </div>
+        </div>
+    </div>
+
+    <section class="mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+            <h2 class="h5 mb-0">Review rows</h2>
+            <a class="btn btn-sm btn-outline-primary" href="@($"/imports/{BatchId}/review")">Review rows</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Row</th>
+                        <th>Status</th>
+                        <th>Confidence</th>
+                        <th>Product</th>
+                        <th class="text-end">Qty</th>
+                        <th>Kind</th>
+                        <th>Location</th>
+                        <th>Issues</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var detail in _details.ReviewRows)
+                    {
+                        var row = detail.Row;
+                        <tr>
+                            <td>@(row.RowIndex + 1)</td>
+                            <td><span class="badge @ReviewStatusClass(row.Status)">@row.Status</span></td>
+                            <td>@($"{row.Confidence:P0}")</td>
+                            <td>@(row.ProductName ?? row.Sku)</td>
+                            <td class="text-end">@row.Quantity</td>
+                            <td>@row.Kind</td>
+                            <td>@row.LocationName</td>
+                            <td>
+                                @foreach (var issue in Issues(row))
+                                {
+                                    <div class="small text-danger">@issue</div>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="mb-4">
+        <h2 class="h5">Raw source rows</h2>
+        @if (_details.RawRecords.Count == 0)
+        {
+            <p class="text-muted">No raw source rows were captured.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Row</th>
+                            @foreach (var column in _rawColumns)
+                            {
+                                <th>@column</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var raw in _details.RawRecords)
+                        {
+                            <tr>
+                                <td>@(raw.RowIndex + 1)</td>
+                                @foreach (var column in _rawColumns)
+                                {
+                                    <td>@RawCell(raw.Id, column)</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+
+    <section class="mb-4">
+        <h2 class="h5">Created movements</h2>
+        @if (_details.Movements.Count == 0)
+        {
+            <p class="text-muted">No movements have been created from this batch yet.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Kind</th>
+                            <th class="text-end">Qty</th>
+                            <th class="text-end">Unit price</th>
+                            <th>Cur</th>
+                            <th>Date</th>
+                            <th>Location</th>
+                            <th>Source row</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var movement in _details.Movements)
+                        {
+                            <tr>
+                                <td>@movement.ProductName</td>
+                                <td><span class="badge @KindClass(movement.Kind)">@movement.Kind</span></td>
+                                <td class="text-end">@movement.Quantity</td>
+                                <td class="text-end">@movement.UnitPrice</td>
+                                <td>@movement.Currency</td>
+                                <td>@movement.OccurredOn</td>
+                                <td>@movement.LocationName</td>
+                                <td>@SourceRow(movement.SourceRowIndex)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+}
+
+@code {
+    [Parameter] public int BatchId { get; set; }
+
+    private ImportBatchDetails? _details;
+    private bool _missing;
+    private readonly Dictionary<int, IReadOnlyDictionary<string, string?>> _rawCellsById = new();
+    private IReadOnlyList<string> _rawColumns = Array.Empty<string>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _details = await Importer.GetImportBatchDetailsAsync(BatchId);
+        _missing = _details is null;
+        BuildRawCellIndex();
+    }
+
+    private void BuildRawCellIndex()
+    {
+        _rawCellsById.Clear();
+        _rawColumns = Array.Empty<string>();
+        if (_details is null) return;
+
+        var columns = new List<string>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var raw in _details.RawRecords)
+        {
+            var cells = ParseCells(raw.DataJson);
+            _rawCellsById[raw.Id] = cells;
+            foreach (var key in cells.Keys)
+            {
+                if (seen.Add(key))
+                    columns.Add(key);
+            }
+        }
+
+        _rawColumns = columns;
+    }
+
+    private string? RawCell(int rawRecordId, string column) =>
+        _rawCellsById.TryGetValue(rawRecordId, out var cells) && cells.TryGetValue(column, out var value)
+            ? value
+            : null;
+
+    private static IReadOnlyDictionary<string, string?> ParseCells(string rawJson)
+    {
+        if (string.IsNullOrWhiteSpace(rawJson))
+            return new Dictionary<string, string?>();
+
+        try
+        {
+            using var doc = JsonDocument.Parse(rawJson);
+            if (doc.RootElement.ValueKind != JsonValueKind.Object)
+                return new Dictionary<string, string?>();
+
+            var cells = new Dictionary<string, string?>();
+            foreach (var property in doc.RootElement.EnumerateObject())
+            {
+                cells[property.Name] = property.Value.ValueKind switch
+                {
+                    JsonValueKind.Null => null,
+                    JsonValueKind.String => property.Value.GetString(),
+                    _ => property.Value.ToString()
+                };
+            }
+
+            return cells;
+        }
+        catch (JsonException)
+        {
+            return new Dictionary<string, string?>();
+        }
+    }
+
+    private static IReadOnlyList<string> Issues(ReviewRow row)
+    {
+        if (string.IsNullOrWhiteSpace(row.IssuesJson))
+            return Array.Empty<string>();
+
+        return JsonSerializer.Deserialize<List<string>>(row.IssuesJson) ?? new List<string>();
+    }
+
+    private static string BatchStatusClass(ImportStatus status) => status switch
+    {
+        ImportStatus.Imported => "text-bg-success",
+        ImportStatus.AwaitingReview => "text-bg-warning",
+        ImportStatus.Failed => "text-bg-danger",
+        _ => "text-bg-secondary"
+    };
+
+    private static string ReviewStatusClass(ReviewRowStatus status) => status switch
+    {
+        ReviewRowStatus.Ready => "text-bg-success",
+        ReviewRowStatus.Applied => "text-bg-primary",
+        ReviewRowStatus.Rejected => "text-bg-secondary",
+        _ => "text-bg-warning"
+    };
+
+    private static string KindClass(MovementKind kind) => kind switch
+    {
+        MovementKind.In => "text-bg-success",
+        MovementKind.Out => "text-bg-danger",
+        _ => "text-bg-secondary"
+    };
+
+    private static string TruncateFingerprint(string? fingerprint)
+    {
+        if (string.IsNullOrWhiteSpace(fingerprint))
+            return "";
+
+        return fingerprint.Length <= 12 ? fingerprint : fingerprint[..12];
+    }
+
+    private static string SourceRow(int? rowIndex) => rowIndex is { } index ? (index + 1).ToString() : "";
+}

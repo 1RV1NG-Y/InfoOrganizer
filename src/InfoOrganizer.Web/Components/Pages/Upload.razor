@@ -1,0 +1,72 @@
+@page "/upload"
+@rendermode InteractiveServer
+@inject ImportService Importer
+@inject ImportSession Session
+@inject NavigationManager Nav
+
+<PageTitle>Import</PageTitle>
+
+<h1>Import records</h1>
+<p class="text-muted">Upload a spreadsheet (<code>.xlsx</code> or <code>.csv</code>) or a photo of a paper record. The system reads it,
+figures out the columns, and lets you confirm before saving.</p>
+
+<div class="mb-3">
+    <InputFile OnChange="OnFilesAsync" accept=".xlsx,.xlsm,.xltx,.csv,.tsv,image/*" class="form-control" disabled="@_busy" />
+</div>
+
+@if (_busy)
+{
+    <div class="d-flex align-items-center gap-2">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Reading <strong>@_fileName</strong>… this can take a moment for photos.</span>
+    </div>
+}
+
+@if (_error is not null)
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@code {
+    private bool _busy;
+    private string? _error;
+    private string? _fileName;
+
+    private async Task OnFilesAsync(InputFileChangeEventArgs e)
+    {
+        _busy = true;
+        _error = null;
+        _fileName = e.File.Name;
+        try
+        {
+            await using var stream = e.File.OpenReadStream(maxAllowedSize: 25 * 1024 * 1024);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+
+            var upload = new UploadedFile
+            {
+                FileName = e.File.Name,
+                ContentType = e.File.ContentType,
+                Content = ms.ToArray()
+            };
+
+            var previews = await Importer.PrepareAsync(upload);
+            if (previews.Count == 0)
+            {
+                _error = "Couldn't find any table in that file.";
+                return;
+            }
+
+            Session.Previews = previews;
+            Nav.NavigateTo("/review");
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

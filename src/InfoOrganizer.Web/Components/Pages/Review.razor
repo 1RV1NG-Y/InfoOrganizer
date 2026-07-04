@@ -1,0 +1,233 @@
+@page "/review"
+@rendermode InteractiveServer
+@inject ImportService Importer
+@inject ImportSession Session
+@inject NavigationManager Nav
+
+<PageTitle>Review mapping</PageTitle>
+
+@if (!Session.HasWork)
+{
+    <h1>Review mapping</h1>
+    <p class="text-muted">Nothing to review. <a href="upload">Upload a file</a> first.</p>
+}
+else
+{
+    var preview = Session.Previews[_index];
+    var table = preview.Table;
+
+    <h1>Review mapping</h1>
+
+    @if (Session.Previews.Count > 1)
+    {
+        <div class="mb-3">
+            <label class="form-label">Sheet / table</label>
+            <select class="form-select w-auto" @bind="_index" @bind:after="EnsureFields">
+                @for (var i = 0; i < Session.Previews.Count; i++)
+                {
+                    var p = Session.Previews[i];
+                    <option value="@i">@(p.Table.Meta.SheetName ?? p.FileName) (@p.Table.Rows.Count rows)</option>
+                }
+            </select>
+        </div>
+    }
+
+    @if (!preview.Resolution.RequiresConfirmation)
+    {
+        <div class="alert alert-info">Recognized format. Review the mapping, then stage rows before they affect inventory.</div>
+    }
+    else
+    {
+        <div class="alert alert-secondary">
+            Proposed by @preview.Resolution.Source@(string.IsNullOrEmpty(Proposal.Rationale) ? "" : $" - {Proposal.Rationale}")
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-6">
+            <h2 class="h5">Column mapping</h2>
+            <table class="table table-sm align-middle">
+                <thead><tr><th>Field</th><th>Source column</th><th>Confidence</th></tr></thead>
+                <tbody>
+                    @foreach (var info in CanonicalSchema.Fields)
+                    {
+                        var fm = Field(info.Field);
+                        <tr>
+                            <td>
+                                @info.Field
+                                @if (info.Required)
+                                {
+                                    <span class="text-danger">*</span>
+                                }
+                            </td>
+                            <td>
+                                <select class="form-select form-select-sm"
+                                        value="@(fm.SourceColumn ?? "")"
+                                        @onchange="e => SetColumn(info.Field, e.Value?.ToString())">
+                                    <option value="">(none)</option>
+                                    @foreach (var c in table.Columns)
+                                    {
+                                        <option value="@c.Name">@c.Name</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                @if (fm.SourceColumn is not null && fm.Confidence > 0)
+                                {
+                                    <span class="badge text-bg-light">@($"{fm.Confidence:P0}")</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-lg-6">
+            <h2 class="h5">Source preview</h2>
+            <div class="table-responsive" style="max-height: 320px; overflow:auto;">
+                <table class="table table-sm table-bordered small">
+                    <thead><tr>@foreach (var c in table.Columns) { <th>@c.Name</th> }</tr></thead>
+                    <tbody>
+                        @foreach (var row in table.Rows.Take(8))
+                        {
+                            <tr>@foreach (var c in table.Columns) { <td>@row[c.Name]</td> }</tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (table.Rows.Count > 8)
+            {
+                <p class="text-muted small">...and @(table.Rows.Count - 8) more rows.</p>
+            }
+        </div>
+    </div>
+
+    <hr />
+    <div class="row g-3 align-items-end">
+        <div class="col-auto">
+            <label class="form-label">These records are</label>
+            <select class="form-select form-select-sm" @bind="Proposal.DetectedRecordType">
+                @foreach (var rt in Enum.GetValues<RecordType>())
+                {
+                    <option value="@rt">@Describe(rt)</option>
+                }
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label">Date format</label>
+            <input class="form-control form-control-sm" placeholder="auto" @bind="Proposal.Hints.DateFormat" />
+        </div>
+        <div class="col-auto">
+            <label class="form-label">Currency</label>
+            <input class="form-control form-control-sm" style="width:6rem" @bind="Proposal.Hints.DefaultCurrency" />
+        </div>
+        <div class="col-auto">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="comma" @bind="Proposal.Hints.DecimalComma" />
+                <label class="form-check-label" for="comma">Comma decimals (1.234,56)</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 align-items-end mt-1">
+        <div class="col-auto">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="save" @bind="_saveProfile" />
+                <label class="form-check-label" for="save">Remember this mapping</label>
+            </div>
+        </div>
+        @if (_saveProfile)
+        {
+            <div class="col-auto">
+                <input class="form-control form-control-sm" placeholder="Mapping name" @bind="_profileName" />
+            </div>
+        }
+    </div>
+
+    @if (_error is not null)
+    {
+        <div class="alert alert-danger mt-3">@_error</div>
+    }
+
+    <div class="mt-3">
+        <button class="btn btn-primary" disabled="@(!CanStage || _staging)" @onclick="StageAsync">
+            @if (_staging)
+            {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            Stage @table.Rows.Count rows for review
+        </button>
+        <a class="btn btn-outline-secondary" href="upload">Cancel</a>
+        @if (!CanStage)
+        {
+            <span class="text-danger ms-2 small">Map at least Product name or Code, plus Quantity, to continue.</span>
+        }
+    </div>
+}
+
+@code {
+    private int _index;
+    private bool _saveProfile = true;
+    private string _profileName = "";
+    private bool _staging;
+    private string? _error;
+
+    private MappingProposal Proposal => Session.Previews[_index].Resolution.Proposal;
+
+    protected override void OnInitialized()
+    {
+        if (Session.HasWork)
+        {
+            _profileName = Session.Previews[0].FileName;
+            EnsureFields();
+        }
+    }
+
+    private void EnsureFields()
+    {
+        foreach (var info in CanonicalSchema.Fields)
+            if (Proposal.Fields.All(f => f.Field != info.Field))
+                Proposal.Fields.Add(new FieldMapping { Field = info.Field, SourceColumn = null, Confidence = 0 });
+    }
+
+    private FieldMapping Field(CanonicalField field) => Proposal.Fields.First(f => f.Field == field);
+
+    private void SetColumn(CanonicalField field, string? value)
+        => Field(field).SourceColumn = string.IsNullOrEmpty(value) ? null : value;
+
+    private bool CanStage =>
+        (Field(CanonicalField.ProductName).SourceColumn is not null
+        || Field(CanonicalField.Sku).SourceColumn is not null)
+        && Field(CanonicalField.Quantity).SourceColumn is not null;
+
+    private static string Describe(RecordType rt) => rt switch
+    {
+        RecordType.Arrivals => "Arrivals (incoming stock)",
+        RecordType.Sales => "Sales (outgoing)",
+        RecordType.StockCount => "Stock count (absolute)",
+        RecordType.Mixed => "Mixed (per-row direction)",
+        _ => "Unknown"
+    };
+
+    private async Task StageAsync()
+    {
+        _staging = true;
+        _error = null;
+        try
+        {
+            var preview = Session.Previews[_index];
+            var staged = await Importer.StageAsync(preview, Proposal, _profileName, _saveProfile);
+            Session.Clear();
+            Nav.NavigateTo($"/imports/{staged.BatchId}/review");
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _staging = false;
+        }
+    }
+}

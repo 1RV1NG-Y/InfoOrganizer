@@ -1,0 +1,162 @@
+@page "/inventory"
+@rendermode InteractiveServer
+@using System.Globalization
+@inject TrackingService Tracking
+
+<PageTitle>Inventory</PageTitle>
+
+<h1>Inventory</h1>
+
+@if (_levels is null)
+{
+    <p>Loading...</p>
+}
+else if (_levels.Count == 0)
+{
+    <p class="text-muted">No products yet. <a href="upload">Import some records</a> to get started.</p>
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="text-muted">@_levels.Count products / @_levels.Count(l => l.IsLow) low on stock</span>
+        <div class="d-flex gap-2 align-items-center">
+            @if ((_locationLevels?.Count ?? 0) > 0)
+            {
+                <div class="btn-group btn-group-sm" role="group" aria-label="Stock view">
+                    <button type="button" class="btn @ViewButtonClass(InventoryView.Global)" @onclick="() => _view = InventoryView.Global">Global</button>
+                    <button type="button" class="btn @ViewButtonClass(InventoryView.Location)" @onclick="() => _view = InventoryView.Location">By location</button>
+                </div>
+            }
+            <a class="btn btn-sm btn-outline-secondary" href="/export/inventory.csv" target="_blank">Export CSV</a>
+        </div>
+    </div>
+
+    @if (_view == InventoryView.Global)
+    {
+        var valueTotals = InventoryValueTotals();
+        var valuedProductCount = _levels.Count(l => l.Value is not null);
+        <div class="table-responsive">
+            <table class="table table-sm table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Code</th>
+                        <th>Category</th>
+                        <th class="text-end">On hand</th>
+                        <th>Unit</th>
+                        <th class="text-end">Unit cost</th>
+                        <th class="text-end">Value</th>
+                        <th class="text-end">Reorder at</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var l in _levels)
+                    {
+                        <tr>
+                            <td>@l.Name</td>
+                            <td>@l.Sku</td>
+                            <td>@l.Category</td>
+                            <td class="text-end">@l.OnHand</td>
+                            <td>@l.Unit</td>
+                            <td class="text-end">@FormatNullableMoney(l.UnitCost, l.CostCurrency)</td>
+                            <td class="text-end">@FormatNullableMoney(l.Value, l.CostCurrency)</td>
+                            <td class="text-end">@l.ReorderThreshold</td>
+                            <td>
+                                @if (l.IsLow)
+                                {
+                                    <span class="badge text-bg-warning">Low</span>
+                                }
+                                else
+                                {
+                                    <span class="badge text-bg-success">OK</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot class="table-group-divider">
+                    <tr>
+                        <th colspan="6" class="text-end">Total value</th>
+                        <td class="text-end fw-semibold">
+                            @if (valueTotals.Count == 0)
+                            {
+                                <span>&mdash;</span>
+                            }
+                            else
+                            {
+                                @foreach (var total in valueTotals)
+                                {
+                                    <div>@FormatMoney(total.Value, total.Currency)</div>
+                                }
+                            }
+                        </td>
+                        <td colspan="2"></td>
+                    </tr>
+                    @if (valuedProductCount < _levels.Count)
+                    {
+                        <tr>
+                            <td colspan="9" class="text-end text-muted small">
+                                value covers @valuedProductCount of @_levels.Count products (no cost data for the rest)
+                            </td>
+                        </tr>
+                    }
+                </tfoot>
+            </table>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted small">Location balances can be negative when outgoing records name a store without matching transfer rows; global stock is the consolidated total.</p>
+        <div class="table-responsive">
+            <QuickGrid Items="_locationLevels!.AsQueryable()" class="table table-sm table-striped align-middle">
+                <PropertyColumn Property="@(l => l.Name)" Title="Product" Sortable="true" />
+                <PropertyColumn Property="@(l => l.Sku)" Title="Code" />
+                <PropertyColumn Property="@(l => l.LocationName)" Title="Location" Sortable="true" />
+                <PropertyColumn Property="@(l => l.Category)" Title="Category" />
+                <PropertyColumn Property="@(l => l.OnHand)" Title="On hand" Sortable="true" Align="Align.End" />
+                <PropertyColumn Property="@(l => l.Unit)" Title="Unit" />
+            </QuickGrid>
+        </div>
+    }
+}
+
+@code {
+    private IReadOnlyList<StockLevel>? _levels;
+    private IReadOnlyList<LocationStockLevel>? _locationLevels;
+    private InventoryView _view = InventoryView.Global;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _levels = await Tracking.GetStockLevelsAsync();
+        _locationLevels = await Tracking.GetStockLevelsByLocationAsync();
+    }
+
+    private string ViewButtonClass(InventoryView view) =>
+        _view == view ? "btn-primary" : "btn-outline-secondary";
+
+    private IReadOnlyList<CurrencyValue> InventoryValueTotals() =>
+        _levels is null
+            ? Array.Empty<CurrencyValue>()
+            : _levels
+                .Where(l => l.Value is not null)
+                .GroupBy(l => NormalizeCurrency(l.CostCurrency))
+                .Select(g => new CurrencyValue(g.Key, g.Sum(l => l.Value!.Value)))
+                .OrderBy(g => g.Currency)
+                .ToList();
+
+    private static string FormatNullableMoney(decimal? value, string? currency) =>
+        value is { } amount ? FormatMoney(amount, currency) : "";
+
+    private static string FormatMoney(decimal value, string? currency) =>
+        $"{value.ToString("C", CultureInfo.CurrentCulture)} {NormalizeCurrency(currency)}";
+
+    private static string NormalizeCurrency(string? currency) =>
+        string.IsNullOrWhiteSpace(currency) ? "MXN" : currency.Trim().ToUpperInvariant();
+
+    private enum InventoryView
+    {
+        Global,
+        Location
+    }
+}

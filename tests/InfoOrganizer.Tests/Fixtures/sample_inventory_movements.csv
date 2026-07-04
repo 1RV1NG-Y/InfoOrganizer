@@ -1,0 +1,8 @@
+Fecha,Tipo Movimiento,Codigo,Producto,Cantidad,Unidad,Almacen,Proveedor/Cliente,Precio Unitario,Nota
+2026-06-20,Entrada,CAF-250,Cafe molido 250g,24,pieza,Bodega,Distribuidora Norte,68.5,Llegada semanal
+2026-06-20,Entrada,AZU-001,Azucar 1kg,18,pieza,Bodega,Abarrotes Centro,31,Compra inicial
+2026-06-21,Venta,CAF-250,Cafe molido 250g,5,pieza,Tienda,Cliente mostrador,92,Venta de mostrador
+2026-06-21,Salida,AZU-001,Azucar 1kg,3,pieza,Tienda,Uso interno,0,Uso para cafeteria
+2026-06-22,Entrada,VAS-012,Vasos termicos 12oz,200,pieza,Bodega,Empaques del Valle,1.85,Caja completa
+2026-06-23,Venta,VAS-012,Vasos termicos 12oz,35,pieza,Tienda,Cliente mostrador,3.5,Venta rapida
+2026-06-24,Ajuste,CAF-250,Cafe molido 250g,-1,pieza,Bodega,,0,Producto danado

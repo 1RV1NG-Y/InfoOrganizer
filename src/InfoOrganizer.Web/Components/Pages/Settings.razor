@@ -1,0 +1,172 @@
+@page "/settings"
+@rendermode InteractiveServer
+@inject CatalogService Catalog
+@inject ILocalSettingsService LocalSettings
+@inject InfoOrganizer.Ai.IAiClient Ai
+
+<PageTitle>Settings</PageTitle>
+
+<h1>Settings</h1>
+
+<h2 class="h5 mt-3">AI features (photo import and mapping suggestions)</h2>
+@if (Ai.IsConfigured)
+{
+    <p class="text-success mb-2">Configured</p>
+}
+else
+{
+    <p class="text-muted mb-2">Not configured &mdash; photo import and AI mapping suggestions are disabled; spreadsheet import still works offline.</p>
+}
+
+@if (_savedKeyHint is not null)
+{
+    <p class="small text-muted mb-2">Saved key: <code>@_savedKeyHint</code></p>
+}
+
+<div class="d-flex flex-column flex-sm-row gap-2 align-items-sm-end mb-2" style="max-width: 640px">
+    <div class="flex-grow-1">
+        <label class="form-label" for="anthropic-api-key">Anthropic API key</label>
+        <input id="anthropic-api-key" type="password" class="form-control" autocomplete="off"
+               placeholder="@(_hasSavedAnthropicApiKey ? "Paste a new key to replace the saved key" : "Paste an Anthropic API key")"
+               @bind="_anthropicApiKeyInput" />
+    </div>
+    <button class="btn btn-primary" @onclick="SaveAnthropicKey">Save</button>
+    @if (_hasSavedAnthropicApiKey)
+    {
+        <button class="btn btn-outline-danger" @onclick="RemoveAnthropicKey">Remove key</button>
+    }
+</div>
+
+@if (_aiSettingsMessage is not null)
+{
+    <p class="small text-success">@_aiSettingsMessage</p>
+}
+
+<h2 class="h5 mt-4">Reorder thresholds</h2>
+<p class="text-muted">Set the level at which a product is flagged low on the dashboard.</p>
+
+@if (_products is null)
+{
+    <p>Loading…</p>
+}
+else if (_products.Count == 0)
+{
+    <p class="text-muted">No products yet. <a href="upload">Import some records</a> first.</p>
+}
+else
+{
+    <table class="table table-sm align-middle" style="max-width: 640px">
+        <thead><tr><th>Product</th><th>Code</th><th style="width: 9rem">Reorder at</th><th></th></tr></thead>
+        <tbody>
+            @foreach (var p in _products)
+            {
+                <tr>
+                    <td>@p.Name</td>
+                    <td>@p.Sku</td>
+                    <td><input type="number" class="form-control form-control-sm" @bind="_thresholds[p.Id]" /></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" @onclick="() => SaveThresholdAsync(p.Id)">Save</button>
+                        @if (_savedId == p.Id)
+                        {
+                            <span class="text-success small ms-1">Saved</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<h2 class="h5 mt-4">Saved mappings</h2>
+<p class="text-muted">Formats the system recognizes automatically. Delete one to be asked to confirm it again next time.</p>
+
+@if (_profiles is null)
+{
+    <p>Loading…</p>
+}
+else if (_profiles.Count == 0)
+{
+    <p class="text-muted">No saved mappings yet.</p>
+}
+else
+{
+    <ul class="list-group" style="max-width: 640px">
+        @foreach (var pr in _profiles)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>@pr.Name <span class="badge text-bg-light">@pr.DefaultRecordType</span></span>
+                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteProfileAsync(pr.Id)">Delete</button>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private IReadOnlyList<Product>? _products;
+    private IReadOnlyList<ProfileInfo>? _profiles;
+    private Dictionary<int, decimal?> _thresholds = new();
+    private int? _savedId;
+    private string? _anthropicApiKeyInput;
+    private string? _savedKeyHint;
+    private bool _hasSavedAnthropicApiKey;
+    private string? _aiSettingsMessage;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        LoadAiSettings();
+        _products = await Catalog.GetProductsAsync();
+        _thresholds = _products.ToDictionary(p => p.Id, p => p.ReorderThreshold);
+        _profiles = await Catalog.GetProfilesAsync();
+    }
+
+    private void LoadAiSettings()
+    {
+        _hasSavedAnthropicApiKey = LocalSettings.HasSavedAnthropicApiKey();
+        _savedKeyHint = _hasSavedAnthropicApiKey ? MaskKey(LocalSettings.GetAnthropicApiKey()) : null;
+    }
+
+    private void SaveAnthropicKey()
+    {
+        if (string.IsNullOrWhiteSpace(_anthropicApiKeyInput))
+            return;
+
+        LocalSettings.SaveAnthropicApiKey(_anthropicApiKeyInput);
+        _anthropicApiKeyInput = null;
+        _aiSettingsMessage = "Saved";
+        LoadAiSettings();
+    }
+
+    private void RemoveAnthropicKey()
+    {
+        LocalSettings.RemoveAnthropicApiKey();
+        _anthropicApiKeyInput = null;
+        _aiSettingsMessage = "Removed";
+        LoadAiSettings();
+    }
+
+    private async Task SaveThresholdAsync(int id)
+    {
+        await Catalog.SetReorderThresholdAsync(id, _thresholds[id]);
+        _savedId = id;
+    }
+
+    private async Task DeleteProfileAsync(int id)
+    {
+        await Catalog.DeleteProfileAsync(id);
+        _profiles = await Catalog.GetProfilesAsync();
+    }
+
+    private static string? MaskKey(string? key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+            return null;
+
+        var trimmed = key.Trim();
+        var suffix = trimmed.Length <= 4 ? trimmed : trimmed[^4..];
+        return trimmed.StartsWith("sk-ant-", StringComparison.OrdinalIgnoreCase)
+            ? $"sk-ant-...{suffix}"
+            : $"...{suffix}";
+    }
+}

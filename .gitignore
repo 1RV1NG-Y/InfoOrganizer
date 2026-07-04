@@ -1,0 +1,25 @@
+# Build output
+bin/
+obj/
+artifacts/
+
+# SQLite databases (created at runtime / design time)
+*.db
+*.db-shm
+*.db-wal
+
+# User-specific
+*.user
+.vs/
+
+# Local dev logs
+*.log
+*.err.log
+
+# Internal working material — kept locally, not part of the public repo
+# (full history preserved on the local-only archive/pre-public branch)
+docs/audited/
+docs/auditing/
+docs/HANDOFF.md
+legacy/
+.claude/

@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/InfoOrganizer.Ai/InfoOrganizer.Ai.csproj" />
+    <Project Path="src/InfoOrganizer.Application/InfoOrganizer.Application.csproj" />
+    <Project Path="src/InfoOrganizer.Data/InfoOrganizer.Data.csproj" />
+    <Project Path="src/InfoOrganizer.Domain/InfoOrganizer.Domain.csproj" />
+    <Project Path="src/InfoOrganizer.Ingestion/InfoOrganizer.Ingestion.csproj" />
+    <Project Path="src/InfoOrganizer.Mapping/InfoOrganizer.Mapping.csproj" />
+    <Project Path="src/InfoOrganizer.Web/InfoOrganizer.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/InfoOrganizer.Tests/InfoOrganizer.Tests.csproj" />
+  </Folder>
+</Solution>
