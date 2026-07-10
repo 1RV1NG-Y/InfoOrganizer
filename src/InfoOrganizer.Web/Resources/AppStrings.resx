@@ -242,12 +242,19 @@
   <data name="Settings_AiProvider" xml:space="preserve"><value>AI provider</value></data>
   <data name="Settings_ProviderAnthropic" xml:space="preserve"><value>Anthropic</value></data>
   <data name="Settings_ProviderOpenAI" xml:space="preserve"><value>OpenAI</value></data>
+  <data name="Settings_ProviderOllama" xml:space="preserve"><value>Local (Ollama)</value></data>
   <data name="Settings_AnthropicApiKey" xml:space="preserve"><value>Anthropic API key</value></data>
   <data name="Settings_OpenAiApiKey" xml:space="preserve"><value>OpenAI API key</value></data>
   <data name="Settings_PlaceholderReplaceKey" xml:space="preserve"><value>Paste a new key to replace the saved key</value></data>
   <data name="Settings_PlaceholderPasteKey" xml:space="preserve"><value>Paste an Anthropic API key</value></data>
   <data name="Settings_PlaceholderPasteOpenAiKey" xml:space="preserve"><value>Paste an OpenAI API key</value></data>
   <data name="Settings_RemoveKey" xml:space="preserve"><value>Remove key</value></data>
+  <data name="Settings_OllamaHost" xml:space="preserve"><value>Host</value></data>
+  <data name="Settings_OllamaModel" xml:space="preserve"><value>Model</value></data>
+  <data name="Settings_OllamaTestConnection" xml:space="preserve"><value>Test connection</value></data>
+  <data name="Settings_OllamaInstalledModels" xml:space="preserve"><value>Installed models</value></data>
+  <data name="Settings_OllamaServerAccessible" xml:space="preserve"><value>Server accessible - {0} models</value></data>
+  <data name="Settings_OllamaConnectionFailed" xml:space="preserve"><value>Could not connect to the Ollama server. Check that Ollama is running and the host is correct.</value></data>
   <data name="Settings_MsgSaved" xml:space="preserve"><value>Saved</value></data>
   <data name="Settings_MsgRemoved" xml:space="preserve"><value>Removed</value></data>
   <data name="Settings_ReorderThresholds" xml:space="preserve"><value>Reorder thresholds</value></data>

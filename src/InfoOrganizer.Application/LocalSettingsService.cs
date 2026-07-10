@@ -108,6 +108,40 @@ public sealed class LocalSettingsService : ILocalSettingsService
         }
     }
 
+    public string? GetSavedOllamaHost()
+    {
+        lock (_gate)
+        {
+            return string.IsNullOrWhiteSpace(_settings.OllamaHost) ? null : _settings.OllamaHost;
+        }
+    }
+
+    public void SaveOllamaHost(string host)
+    {
+        lock (_gate)
+        {
+            _settings.OllamaHost = string.IsNullOrWhiteSpace(host) ? null : host.Trim();
+            WriteSettings();
+        }
+    }
+
+    public string? GetSavedOllamaModel()
+    {
+        lock (_gate)
+        {
+            return string.IsNullOrWhiteSpace(_settings.OllamaModel) ? null : _settings.OllamaModel;
+        }
+    }
+
+    public void SaveOllamaModel(string model)
+    {
+        lock (_gate)
+        {
+            _settings.OllamaModel = string.IsNullOrWhiteSpace(model) ? null : model.Trim();
+            WriteSettings();
+        }
+    }
+
     public void RemoveAnthropicApiKey()
     {
         lock (_gate)
@@ -169,6 +203,8 @@ public sealed class LocalSettingsService : ILocalSettingsService
         public ProtectedSetting? AnthropicApiKey { get; set; }
         public ProtectedSetting? OpenAiApiKey { get; set; }
         public string? AiProvider { get; set; }
+        public string? OllamaHost { get; set; }
+        public string? OllamaModel { get; set; }
     }
 
     private sealed record ProtectedSetting(string Protection, string Value);

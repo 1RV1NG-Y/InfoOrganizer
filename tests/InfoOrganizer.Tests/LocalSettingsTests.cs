@@ -80,6 +80,26 @@ public class LocalSettingsTests
     }
 
     [Fact]
+    public void Ollama_host_and_model_round_trip_as_plain_values()
+    {
+        using var temp = new TempDirectory();
+
+        var settings = new LocalSettingsService(temp.DirectoryPath);
+        settings.SaveOllamaHost(" http://localhost:11434 ");
+        settings.SaveOllamaModel(" qwen3-vl:4b ");
+
+        var loaded = new LocalSettingsService(temp.DirectoryPath);
+        Assert.Equal("http://localhost:11434", loaded.GetSavedOllamaHost());
+        Assert.Equal("qwen3-vl:4b", loaded.GetSavedOllamaModel());
+
+        var settingsJson = File.ReadAllText(Path.Combine(temp.DirectoryPath, "settings.json"));
+        Assert.Contains("\"OllamaHost\"", settingsJson, StringComparison.Ordinal);
+        Assert.Contains("\"http://localhost:11434\"", settingsJson, StringComparison.Ordinal);
+        Assert.Contains("\"OllamaModel\"", settingsJson, StringComparison.Ordinal);
+        Assert.Contains("\"qwen3-vl:4b\"", settingsJson, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Remove_key_makes_load_return_null()
     {
         using var temp = new TempDirectory();
@@ -140,10 +160,54 @@ public class LocalSettingsTests
         Assert.True(client.IsConfigured);
     }
 
+    [Fact]
+    public void Ollama_client_configuration_requires_host_and_model()
+    {
+        var provider = new MutableOllamaSettingsProvider();
+        var client = new OllamaAiClient(new OllamaOptions(), provider);
+
+        Assert.False(client.IsConfigured);
+
+        provider.Host = "http://127.0.0.1:11434";
+        Assert.False(client.IsConfigured);
+
+        provider.Model = "qwen3-vl:4b";
+        Assert.True(client.IsConfigured);
+    }
+
+    [Fact]
+    public void Ollama_settings_provider_prefers_saved_values_then_options()
+    {
+        using var temp = new TempDirectory();
+        var settings = new LocalSettingsService(temp.DirectoryPath);
+        var provider = new OllamaSettingsProvider(settings, new OllamaOptions
+        {
+            Host = "http://config-host:11434",
+            Model = "config-model"
+        });
+
+        Assert.Equal("http://config-host:11434", provider.GetHost());
+        Assert.Equal("config-model", provider.GetModel());
+
+        settings.SaveOllamaHost("http://saved-host:11434");
+        settings.SaveOllamaModel("saved-model");
+
+        Assert.Equal("http://saved-host:11434", provider.GetHost());
+        Assert.Equal("saved-model", provider.GetModel());
+    }
+
     private sealed class MutableKeyProvider : IAnthropicApiKeyProvider
     {
         public string? ApiKey { get; set; }
         public string? GetApiKey() => ApiKey;
+    }
+
+    private sealed class MutableOllamaSettingsProvider : IOllamaSettingsProvider
+    {
+        public string? Host { get; set; }
+        public string? Model { get; set; }
+        public string? GetHost() => Host;
+        public string? GetModel() => Model;
     }
 
     private sealed class TestConfiguration : IConfiguration

@@ -17,6 +17,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddSingleton<ILocalSettingsService>(_ => new LocalSettingsService(AppPaths.GetAppDataDirectory()));
         services.AddSingleton<IAnthropicApiKeyProvider, AnthropicApiKeyProvider>();
         services.AddSingleton<IOpenAiApiKeyProvider, OpenAiApiKeyProvider>();
+        services.AddSingleton<IOllamaSettingsProvider, OllamaSettingsProvider>();
         services.AddSingleton(new AnthropicOptions
         {
             Model = config["Anthropic:Model"] ?? "claude-opus-4-8"
@@ -25,13 +26,24 @@ public static class ApplicationServiceCollectionExtensions
         {
             Model = config["OpenAi:Model"] ?? "gpt-5.1"
         });
+        services.AddSingleton(new OllamaOptions
+        {
+            Host = config["Ollama:Host"] ?? "http://127.0.0.1:11434",
+            Model = config["Ollama:Model"] ?? "",
+            Think = bool.TryParse(config["Ollama:Think"], out var think) && think,
+            MaxImageEdge = ReadInt(config["Ollama:MaxImageEdge"], 1024),
+            NumPredictMapping = ReadInt(config["Ollama:NumPredictMapping"], 2048),
+            NumPredictImage = ReadInt(config["Ollama:NumPredictImage"], 4096)
+        });
         services.AddSingleton<AnthropicAiClient>();
         services.AddSingleton<OpenAiAiClient>();
+        services.AddSingleton<OllamaAiClient>();
         services.AddSingleton<IAiClient>(sp => new AiProviderRouter(
             sp.GetRequiredService<ILocalSettingsService>(),
             config,
             sp.GetRequiredService<AnthropicAiClient>(),
-            sp.GetRequiredService<OpenAiAiClient>()));
+            sp.GetRequiredService<OpenAiAiClient>(),
+            sp.GetRequiredService<OllamaAiClient>()));
 
         // Ingestion adapters (resolved as a set so the import service can pick by file type).
         services.AddSingleton<ISourceAdapter, ExcelSourceAdapter>();
@@ -54,4 +66,7 @@ public static class ApplicationServiceCollectionExtensions
 
         return services;
     }
+
+    private static int ReadInt(string? value, int fallback) =>
+        int.TryParse(value, out var parsed) && parsed > 0 ? parsed : fallback;
 }

@@ -242,12 +242,19 @@
   <data name="Settings_AiProvider" xml:space="preserve"><value>Proveedor de IA</value></data>
   <data name="Settings_ProviderAnthropic" xml:space="preserve"><value>Anthropic</value></data>
   <data name="Settings_ProviderOpenAI" xml:space="preserve"><value>OpenAI</value></data>
+  <data name="Settings_ProviderOllama" xml:space="preserve"><value>Local (Ollama)</value></data>
   <data name="Settings_AnthropicApiKey" xml:space="preserve"><value>Clave de API de Anthropic</value></data>
   <data name="Settings_OpenAiApiKey" xml:space="preserve"><value>Clave de API de OpenAI</value></data>
   <data name="Settings_PlaceholderReplaceKey" xml:space="preserve"><value>Pega una clave nueva para reemplazar la guardada</value></data>
   <data name="Settings_PlaceholderPasteKey" xml:space="preserve"><value>Pega una clave de API de Anthropic</value></data>
   <data name="Settings_PlaceholderPasteOpenAiKey" xml:space="preserve"><value>Pega una clave de API de OpenAI</value></data>
   <data name="Settings_RemoveKey" xml:space="preserve"><value>Quitar clave</value></data>
+  <data name="Settings_OllamaHost" xml:space="preserve"><value>Servidor</value></data>
+  <data name="Settings_OllamaModel" xml:space="preserve"><value>Modelo</value></data>
+  <data name="Settings_OllamaTestConnection" xml:space="preserve"><value>Probar conexión</value></data>
+  <data name="Settings_OllamaInstalledModels" xml:space="preserve"><value>Modelos instalados</value></data>
+  <data name="Settings_OllamaServerAccessible" xml:space="preserve"><value>Servidor accesible - {0} modelos</value></data>
+  <data name="Settings_OllamaConnectionFailed" xml:space="preserve"><value>No se pudo conectar al servidor de Ollama. Revisa que Ollama esté en ejecución y que el servidor sea correcto.</value></data>
   <data name="Settings_MsgSaved" xml:space="preserve"><value>Guardado</value></data>
   <data name="Settings_MsgRemoved" xml:space="preserve"><value>Eliminado</value></data>
   <data name="Settings_ReorderThresholds" xml:space="preserve"><value>Umbrales de reorden</value></data>

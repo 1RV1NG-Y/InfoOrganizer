@@ -3,12 +3,14 @@ using InfoOrganizer.Domain;
 
 namespace InfoOrganizer.Ai;
 
-internal static class AiResponseParser
+public static class AiResponseParser
 {
     private static readonly JsonSerializerOptions JsonOpts = new() { PropertyNameCaseInsensitive = true };
 
     public static MappingProposal ParseProposal(string json, RawTable table)
     {
+        json = ExtractJsonObject(json) ?? json;
+
         var dto = JsonSerializer.Deserialize<MappingDto>(json, JsonOpts)
             ?? throw new InvalidOperationException("Could not parse mapping JSON.");
 
@@ -43,6 +45,8 @@ internal static class AiResponseParser
 
     public static RawTable ParseImageTable(string json, string fileName)
     {
+        json = ExtractJsonObject(json) ?? json;
+
         var dto = JsonSerializer.Deserialize<ImageDto>(json, JsonOpts)
             ?? throw new InvalidOperationException("Could not parse extracted table JSON.");
 
@@ -72,6 +76,56 @@ internal static class AiResponseParser
         }
 
         return table;
+    }
+
+    public static string? ExtractJsonObject(string raw)
+    {
+        var text = raw.Split(["</think>"], StringSplitOptions.None).Last();
+        var start = text.IndexOf('{', StringComparison.Ordinal);
+        if (start < 0)
+            return null;
+
+        var depth = 0;
+        var inString = false;
+        var escape = false;
+        for (var index = start; index < text.Length; index++)
+        {
+            var ch = text[index];
+            if (inString)
+            {
+                if (escape)
+                {
+                    escape = false;
+                }
+                else if (ch == '\\')
+                {
+                    escape = true;
+                }
+                else if (ch == '"')
+                {
+                    inString = false;
+                }
+
+                continue;
+            }
+
+            if (ch == '"')
+            {
+                inString = true;
+            }
+            else if (ch == '{')
+            {
+                depth++;
+            }
+            else if (ch == '}')
+            {
+                depth--;
+                if (depth == 0)
+                    return text[start..(index + 1)];
+            }
+        }
+
+        return null;
     }
 
     private sealed record ImageDto(List<string>? Columns, List<List<string>>? Rows, string? Notes);

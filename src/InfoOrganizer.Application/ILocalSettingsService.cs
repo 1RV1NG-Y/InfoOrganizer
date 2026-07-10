@@ -12,4 +12,8 @@ public interface ILocalSettingsService
     void RemoveOpenAiApiKey();
     string? GetSavedAiProvider();
     void SaveAiProvider(string provider);
+    string? GetSavedOllamaHost();
+    void SaveOllamaHost(string host);
+    string? GetSavedOllamaModel();
+    void SaveOllamaModel(string model);
 }

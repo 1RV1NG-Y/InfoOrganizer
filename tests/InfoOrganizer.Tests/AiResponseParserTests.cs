@@ -5,6 +5,55 @@ namespace InfoOrganizer.Tests;
 
 public class AiResponseParserTests
 {
+    [Theory]
+    [InlineData("<think>reasoning</think>{\"ok\":true}", "{\"ok\":true}")]
+    [InlineData("Here is the result:\n{\"ok\":true}\nThanks", "{\"ok\":true}")]
+    [InlineData("{\"outer\":{\"inner\":1}} trailing junk", "{\"outer\":{\"inner\":1}}")]
+    [InlineData("{\"text\":\"brace } inside string\",\"quote\":\"escaped \\\" quote\"} after", "{\"text\":\"brace } inside string\",\"quote\":\"escaped \\\" quote\"}")]
+    [InlineData("<think>old</think>{\"ignored\":true}</think> prose {\"final\":true}", "{\"final\":true}")]
+    public void ExtractJsonObject_returns_first_balanced_object_after_last_think(string raw, string expected)
+    {
+        Assert.Equal(expected, AiResponseParser.ExtractJsonObject(raw));
+    }
+
+    [Fact]
+    public void ExtractJsonObject_returns_null_when_no_json_object_exists()
+    {
+        Assert.Null(AiResponseParser.ExtractJsonObject("plain text only"));
+    }
+
+    [Fact]
+    public void ParseProposal_extracts_wrapped_json_before_deserializing()
+    {
+        var table = new RawTable
+        {
+            Columns = [new RawColumn { Name = "Producto" }]
+        };
+
+        const string raw = """
+        <think>reasoning with { braces }</think>
+        The proposal is:
+        {
+          "fields": [
+            { "field": "ProductName", "sourceColumn": "Producto", "confidence": 0.9 }
+          ],
+          "recordType": "Arrivals",
+          "hints": {
+            "dateFormat": "",
+            "decimalComma": false,
+            "defaultCurrency": ""
+          },
+          "rationale": "Header match."
+        }
+        trailing text
+        """;
+
+        var proposal = AiResponseParser.ParseProposal(raw, table);
+
+        Assert.Equal("Producto", proposal.Column(CanonicalField.ProductName));
+        Assert.Equal(RecordType.Arrivals, proposal.DetectedRecordType);
+    }
+
     [Fact]
     public void ParseProposal_maps_columns_case_insensitively_and_clamps_confidence()
     {

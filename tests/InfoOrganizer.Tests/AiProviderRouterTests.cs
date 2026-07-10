@@ -21,7 +21,8 @@ public class AiProviderRouterTests
             settings,
             config,
             new AnthropicAiClient(new AnthropicOptions(), new AnthropicApiKeyProvider(settings, config)),
-            new OpenAiAiClient(new OpenAiOptions(), new OpenAiApiKeyProvider(settings, config)));
+            new OpenAiAiClient(new OpenAiOptions(), new OpenAiApiKeyProvider(settings, config)),
+            new OllamaAiClient(new OllamaOptions(), new OllamaSettingsProvider(settings, new OllamaOptions())));
 
         Assert.False(router.IsConfigured);
 
@@ -40,7 +41,7 @@ public class AiProviderRouterTests
         var anthropic = new RecordingAiClient { IsConfiguredValue = true, Proposal = new MappingProposal { Rationale = "anthropic" } };
         var openAiProposal = new MappingProposal { Rationale = "openai" };
         var openAi = new RecordingAiClient { IsConfiguredValue = true, Proposal = openAiProposal };
-        var router = new AiProviderRouter(settings, new TestConfiguration(new Dictionary<string, string?>()), anthropic, openAi);
+        var router = new AiProviderRouter(settings, new TestConfiguration(new Dictionary<string, string?>()), anthropic, openAi, new RecordingAiClient());
 
         var result = await router.ProposeMappingAsync(new RawTable());
 
@@ -59,13 +60,34 @@ public class AiProviderRouterTests
         var anthropicTable = new RawTable { Meta = new SourceMeta { FileName = "anthropic.jpg" } };
         var anthropic = new RecordingAiClient { IsConfiguredValue = true, ExtractedTable = anthropicTable };
         var openAi = new RecordingAiClient { IsConfiguredValue = true, ExtractedTable = new RawTable() };
-        var router = new AiProviderRouter(settings, new TestConfiguration(new Dictionary<string, string?>()), anthropic, openAi);
+        var router = new AiProviderRouter(settings, new TestConfiguration(new Dictionary<string, string?>()), anthropic, openAi, new RecordingAiClient());
 
         var result = await router.ExtractTableFromImageAsync([1, 2, 3], "image/jpeg", "photo.jpg");
 
         Assert.Same(anthropicTable, result);
         Assert.Equal(1, anthropic.ImageCallCount);
         Assert.Equal(0, openAi.ImageCallCount);
+    }
+
+    [Fact]
+    public async Task ProposeMappingAsync_delegates_to_ollama_when_selected()
+    {
+        using var temp = new TempDirectory();
+        var settings = new LocalSettingsService(temp.DirectoryPath);
+        settings.SaveAiProvider(AiProviderNames.Ollama);
+
+        var anthropic = new RecordingAiClient { IsConfiguredValue = true, Proposal = new MappingProposal { Rationale = "anthropic" } };
+        var openAi = new RecordingAiClient { IsConfiguredValue = true, Proposal = new MappingProposal { Rationale = "openai" } };
+        var ollamaProposal = new MappingProposal { Rationale = "ollama" };
+        var ollama = new RecordingAiClient { IsConfiguredValue = true, Proposal = ollamaProposal };
+        var router = new AiProviderRouter(settings, new TestConfiguration(new Dictionary<string, string?>()), anthropic, openAi, ollama);
+
+        var result = await router.ProposeMappingAsync(new RawTable());
+
+        Assert.Same(ollamaProposal, result);
+        Assert.Equal(0, anthropic.MappingCallCount);
+        Assert.Equal(0, openAi.MappingCallCount);
+        Assert.Equal(1, ollama.MappingCallCount);
     }
 
     private sealed class RecordingAiClient : IAiClient

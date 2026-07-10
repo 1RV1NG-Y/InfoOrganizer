@@ -5,6 +5,7 @@
 @inject CatalogService Catalog
 @inject ILocalSettingsService LocalSettings
 @inject InfoOrganizer.Ai.IAiClient Ai
+@inject InfoOrganizer.Ai.OllamaAiClient OllamaAi
 @inject NavigationManager Nav
 @inject IStringLocalizer<AppStrings> L
 
@@ -22,7 +23,7 @@ else
     <p class="text-muted mb-2">@L["Settings_AiNotConfigured"]</p>
 }
 
-@if (_savedKeyHint is not null)
+@if (!IsOllamaSelected && _savedKeyHint is not null)
 {
     <p class="small text-muted mb-2">@L["Settings_SavedKey"] <code>@_savedKeyHint</code></p>
 }
@@ -32,22 +33,69 @@ else
     <select id="ai-provider" class="form-select" value="@_selectedAiProvider" @onchange="ChangeAiProvider">
         <option value="@AiProviderNames.Anthropic">@L["Settings_ProviderAnthropic"]</option>
         <option value="@AiProviderNames.OpenAI">@L["Settings_ProviderOpenAI"]</option>
+        <option value="@AiProviderNames.Ollama">@L["Settings_ProviderOllama"]</option>
     </select>
 </div>
 
-<div class="d-flex flex-column flex-sm-row gap-2 align-items-sm-end mb-2" style="max-width: 640px">
-    <div class="flex-grow-1">
-        <label class="form-label" for="ai-api-key">@CurrentApiKeyLabel</label>
-        <input id="ai-api-key" type="password" class="form-control" autocomplete="off"
-               placeholder="@(_hasSavedSelectedProviderKey ? L["Settings_PlaceholderReplaceKey"] : CurrentPasteKeyPlaceholder)"
-               @bind="_apiKeyInput" />
+@if (IsOllamaSelected)
+{
+    <div class="d-flex flex-column gap-2 mb-2" style="max-width: 640px">
+        <div>
+            <label class="form-label" for="ollama-host">@L["Settings_OllamaHost"]</label>
+            <input id="ollama-host" class="form-control" autocomplete="off"
+                   placeholder="@DefaultOllamaHost"
+                   @bind="_ollamaHostInput" />
+        </div>
+        <div>
+            <label class="form-label" for="ollama-model">@L["Settings_OllamaModel"]</label>
+            <input id="ollama-model" class="form-control" autocomplete="off"
+                   @bind="_ollamaModelInput" />
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-secondary" @onclick="TestOllamaConnectionAsync" disabled="@_testingOllama">
+                @L["Settings_OllamaTestConnection"]
+            </button>
+            <button class="btn btn-primary" @onclick="SaveOllamaSettings">@L["Common_Save"]</button>
+        </div>
     </div>
-    <button class="btn btn-primary" @onclick="SaveSelectedProviderKey">@L["Common_Save"]</button>
-    @if (_hasSavedSelectedProviderKey)
+
+    @if (_ollamaConnectionSuccess is not null)
     {
-        <button class="btn btn-outline-danger" @onclick="RemoveSelectedProviderKey">@L["Settings_RemoveKey"]</button>
+        <p class="small text-success mb-2">@_ollamaConnectionSuccess</p>
     }
-</div>
+    @if (_ollamaConnectionError is not null)
+    {
+        <p class="small text-muted mb-2">@_ollamaConnectionError</p>
+    }
+    @if (_ollamaModels.Count > 0)
+    {
+        <div class="mb-2" style="max-width: 640px">
+            <p class="small text-muted mb-1">@L["Settings_OllamaInstalledModels"]</p>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var model in _ollamaModels)
+                {
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => SelectOllamaModel(model)">@model</button>
+                }
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="d-flex flex-column flex-sm-row gap-2 align-items-sm-end mb-2" style="max-width: 640px">
+        <div class="flex-grow-1">
+            <label class="form-label" for="ai-api-key">@CurrentApiKeyLabel</label>
+            <input id="ai-api-key" type="password" class="form-control" autocomplete="off"
+                   placeholder="@(_hasSavedSelectedProviderKey ? L["Settings_PlaceholderReplaceKey"] : CurrentPasteKeyPlaceholder)"
+                   @bind="_apiKeyInput" />
+        </div>
+        <button class="btn btn-primary" @onclick="SaveSelectedProviderKey">@L["Common_Save"]</button>
+        @if (_hasSavedSelectedProviderKey)
+        {
+            <button class="btn btn-outline-danger" @onclick="RemoveSelectedProviderKey">@L["Settings_RemoveKey"]</button>
+        }
+    </div>
+}
 
 @if (_aiSettingsMessage is not null)
 {
@@ -129,6 +177,16 @@ else
     private string? _savedKeyHint;
     private bool _hasSavedSelectedProviderKey;
     private string? _aiSettingsMessage;
+    private string? _ollamaHostInput;
+    private string? _ollamaModelInput;
+    private bool _testingOllama;
+    private string? _ollamaConnectionSuccess;
+    private string? _ollamaConnectionError;
+    private IReadOnlyList<string> _ollamaModels = [];
+
+    private bool IsOllamaSelected => _selectedAiProvider == AiProviderNames.Ollama;
+
+    private string DefaultOllamaHost => Config["Ollama:Host"] ?? "http://127.0.0.1:11434";
 
     private string CurrentApiKeyLabel =>
         _selectedAiProvider == AiProviderNames.OpenAI
@@ -154,12 +212,26 @@ else
     {
         _selectedAiProvider = AiProviderNames.NormalizeOrDefault(LocalSettings.GetSavedAiProvider() ?? Config["Ai:Provider"]);
         LoadSelectedProviderKeyState();
+        LoadOllamaSettings();
     }
 
     private void LoadSelectedProviderKeyState()
     {
+        if (IsOllamaSelected)
+        {
+            _hasSavedSelectedProviderKey = false;
+            _savedKeyHint = null;
+            return;
+        }
+
         _hasSavedSelectedProviderKey = HasSavedSelectedProviderKey();
         _savedKeyHint = _hasSavedSelectedProviderKey ? MaskKey(GetSelectedProviderKey()) : null;
+    }
+
+    private void LoadOllamaSettings()
+    {
+        _ollamaHostInput = LocalSettings.GetSavedOllamaHost() ?? Config["Ollama:Host"] ?? "";
+        _ollamaModelInput = LocalSettings.GetSavedOllamaModel() ?? Config["Ollama:Model"] ?? "";
     }
 
     private void ChangeAiProvider(ChangeEventArgs args)
@@ -168,7 +240,11 @@ else
         LocalSettings.SaveAiProvider(_selectedAiProvider);
         _apiKeyInput = null;
         _aiSettingsMessage = null;
+        _ollamaConnectionSuccess = null;
+        _ollamaConnectionError = null;
+        _ollamaModels = [];
         LoadSelectedProviderKeyState();
+        LoadOllamaSettings();
     }
 
     private void SaveSelectedProviderKey()
@@ -196,6 +272,43 @@ else
         _apiKeyInput = null;
         _aiSettingsMessage = L["Settings_MsgRemoved"];
         LoadSelectedProviderKeyState();
+    }
+
+    private void SaveOllamaSettings()
+    {
+        LocalSettings.SaveOllamaHost(_ollamaHostInput ?? "");
+        LocalSettings.SaveOllamaModel(_ollamaModelInput ?? "");
+        _aiSettingsMessage = L["Settings_MsgSaved"];
+        _ollamaConnectionSuccess = null;
+        _ollamaConnectionError = null;
+    }
+
+    private async Task TestOllamaConnectionAsync()
+    {
+        SaveOllamaSettings();
+        _testingOllama = true;
+        _ollamaConnectionSuccess = null;
+        _ollamaConnectionError = null;
+        _ollamaModels = [];
+
+        try
+        {
+            _ollamaModels = await OllamaAi.ListModelsAsync();
+            _ollamaConnectionSuccess = L["Settings_OllamaServerAccessible", _ollamaModels.Count];
+        }
+        catch
+        {
+            _ollamaConnectionError = L["Settings_OllamaConnectionFailed"];
+        }
+        finally
+        {
+            _testingOllama = false;
+        }
+    }
+
+    private void SelectOllamaModel(string model)
+    {
+        _ollamaModelInput = model;
     }
 
     private bool HasSavedSelectedProviderKey() =>
